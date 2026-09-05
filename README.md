@@ -39,4 +39,4 @@ See [architecture](docs/architecture.md), [roadmap](docs/roadmap.md), and [contr
 
 ## Open-source licensing
 
-Open-source release is the intent. A license has not yet been selected; no open-source license is granted by this planning scaffold. Select and add a LICENSE before accepting code contributions for reuse.
+Project Aura is licensed under the [MIT License](LICENSE).
