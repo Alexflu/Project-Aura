@@ -1,35 +1,34 @@
-# Architecture proposal
+# Architecture
 
-This is a starting design, not an implemented interface contract.
+## Implemented components
 
-## Responsibilities
+| Layer | Implementation | Responsibility |
+| --- | --- | --- |
+| Project Aura | Repository, documentation, MIT license | Umbrella project and community |
+| AuraOS | `run_aura.py`, `launch_desktop.py` | Desktop/MCP entry points and lifecycle |
+| AuraShell | `aura/shell.py`, `aura/ui.py` | Procedural avatar, animation, preview and floating window |
+| AuraCore | `aura/core.py` | Validated state, explicit preferences, bounded adaptation, history, approval queue |
+| AuraBridge | `aura/bridge.py`, `aura/mcp_server.py` | Approved Notepad launch and optional official MCP adapter |
 
-AuraOS manages startup, shutdown, configuration, and component lifecycles. AuraCore owns task plans, state, permission decisions, execution coordination, and results. AuraBridge exposes integrations with Windows, applications, hardware, games, and CAD. AuraShell presents the avatar, overlays, and task animations.
+The desktop uses Python/Tk without third-party packages. The optional SDK runs in a separate process; the portable desktop does not bundle it. SQLite transactions connect the two under one Windows user without an open network port. The Windows account is the local trust boundary, not a defense against programs already running as that user.
 
-Project Aura is the umbrella for these components, their documentation, and the community around them.
+## Request lifecycle
 
-## Example task flow
+1. A supported MCP client reads the permitted appearance context.
+2. A tool validates an appearance patch or a fixed Notepad request.
+3. AuraCore queues it only if the connection is enabled and Aura is not paused.
+4. The desktop shows the request. Only a local review action can accept it; no MCP approval tool exists.
+5. Appearance changes commit transactionally with undo. Launches are claimed once before invoking the bridge, and outcomes are recorded afterward.
+6. The client polls the request identifier. Pending, applied, submitted, rejected, cancelled, expired and failed are distinct outcomes. A crash during a launch can leave `launching`, with explicitly unknown final outcome; it is not retried.
 
-1. The user asks Aura to open an application.
-2. AuraCore determines the required capability and checks its permission scope.
-3. AuraBridge invokes the application integration and returns a result.
-4. AuraCore records and reports success or failure.
-5. AuraShell uses task events to animate progress and completion.
+Pending requests expire after ten minutes. Queue size is bounded to ten pending and 100 total entries. Pausing or disabling the connection cancels pending work. Cosmetic animation is not proof of task success.
 
-Animations must reflect task state; a completed animation is not evidence that an application action succeeded. Integrations should return inspectable results and failures.
+## Appearance and adaptation
 
-## Initial design principles
+Palette, hair, outfit, accessory and silhouette are enum-validated. No scripts, file paths, downloaded models or generated assets enter the renderer. The face stays consistent. Automatic adaptation changes only outfit, accessory and palette after the user records an activity; selected interests and manual counts determine the theme, while the favorite palette remains authoritative. Ties use selected-interest order. Counts saturate at 100. This deterministic baseline is not machine learning.
 
-- Keep presentation separate from task authority and execution.
-- Make permissions explicit and scoped to capabilities.
-- Provide cancellation and a visible way to pause agent actions.
-- Store only the state needed for continuity, with user controls for retention and deletion.
-- Keep credentials out of repository files and task logs.
-- Prefer supported application interfaces where available.
-- Treat content encountered in applications as task data, not permission to expand the task.
+## Storage and extensions
 
-## Future integration areas
+Schema version 1 stores a JSON state document plus separate look history and request tables. Transactions avoid lost updates and double claims. Newer schemas and invalid state fail visibly. Up to 20 looks support undo. State is not encrypted. Reset clears application state, history and requests but cannot revoke information already sent to an MCP provider.
 
-Windows application control, CAD workflows, hardware interfaces, and cooperative games are distinct integration areas. Each needs its own capabilities, feedback, and tests. The initial demonstration does not promise these integrations are already available.
-
-Language, rendering framework, model provider, and integration protocol remain open until the first prototype requirements are agreed.
+Future renderers should consume a versioned appearance document without gaining computer permissions. Integrations need separate schemas, explicit scopes, result receipts and tests. Credentials belong outside avatar state. The [beta plan](beta-plan.md) describes release gates for 3D, voice, providers, games, CAD and hardware. There is no auto-updater, plugin-code execution or general shell executor in this beta.

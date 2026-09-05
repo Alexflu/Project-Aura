@@ -9,3 +9,9 @@ dist/
 build/
 .DS_Store
 Thumbs.db
+artifacts/
+*.spec
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.zip

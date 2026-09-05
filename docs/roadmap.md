@@ -1,35 +1,32 @@
-# Proposed roadmap
+# Roadmap
 
-These are planning milestones, not delivery commitments.
+These are scope milestones, not delivery dates. See the [beta plan and contingency register](beta-plan.md).
 
-## 1. Foundation
+## 0.1 — local tester beta
 
-- [x] Select an open-source license: [MIT](../LICENSE).
-- Agree on the smallest Windows prototype and its implementation stack.
-- Define task lifecycle events and capability boundaries.
+- [x] MIT license and component boundaries.
+- [x] Original animated 2D avatar and floating desktop window.
+- [x] Bounded appearance changes, preview, discard and undo.
+- [x] Explicit interests, activity recording and optional deterministic adaptation.
+- [x] Local persistence, preference export, reset, pause and reduced motion.
+- [x] Approved Notepad launch with honest submission reporting.
+- [x] Optional MCP queue and real stdio integration test.
+- [ ] Validate portable build on a clean Windows machine and multiple displays/scales.
+- [ ] Validate the actual ChatGPT account/tunnel connection.
+- [ ] Audit with assistive technologies.
 
-## 2. Desktop presence
+## 0.2 — conversational embodiment
 
-- Render an avatar in a desktop overlay.
-- Support idle, working, success, and failure states.
-- Provide show, hide, and pause controls.
+Validated ChatGPT compatibility matrix; feedback-driven personalization; versioned import, recovery and migrations; adaptive layout and accessible controls. Optional independent API reasoning only with explicit credentials, costs and privacy controls.
 
-## 3. First real task
+## 0.3 — richer body
 
-- Open a user-selected application through AuraBridge.
-- Check scoped permissions in AuraCore.
-- Show task progress and record the actual result.
-- Demonstrate failure handling and cancellation behavior.
+Licensed rigged 3D asset format, bounded morph targets, asset provenance, safe loading, preview and rollback. Performance budget, 2D fallback and optional cinematic arrivals.
 
-## 4. Persistence and collaboration
+## 0.4 — useful workspace tasks
 
-- Add user-controlled preferences and continuity across sessions.
-- Document setup and gather feedback from early testers.
-- Expand supported integrations based on concrete contributor use cases.
+One supported app API at a time, with scoped authority, test fixtures, cancellation semantics and verifiable outcomes.
 
-## 5. Exploratory integrations
+## Research tracks
 
-- CAD assistance with inspectable outputs.
-- Supported cooperative game participation.
-- Hardware integrations with explicit action boundaries.
-- Richer avatar performances, including cinematic task animations.
+Supported cooperative games, CAD workflows and hardware need separate platform terms, validation and physical safeguards. No dates or working integrations are implied here.
