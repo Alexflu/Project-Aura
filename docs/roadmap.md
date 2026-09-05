@@ -4,7 +4,7 @@ These are planning milestones, not delivery commitments.
 
 ## 1. Foundation
 
-- Select an open-source license.
+- [x] Select an open-source license: [MIT](../LICENSE).
 - Agree on the smallest Windows prototype and its implementation stack.
 - Define task lifecycle events and capability boundaries.
 
