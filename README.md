@@ -10,7 +10,7 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 [Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-## Windows beta 0.7.0-beta.1
+## Windows beta 0.7.0-beta.2
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 

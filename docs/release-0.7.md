@@ -1,4 +1,4 @@
-# 0.7.0-beta.1 — tray presence and shared rigs
+# 0.7.0-beta.2 — tray presence and shared rigs
 
 Aura starts as a floating companion with a system tray icon. Studio opens when requested. **Controls → Menu** can show/hide Studio or the tray icon; hiding the icon is saved. Relaunch the same profile to recover Studio in the existing instance. New MCP requests reopen the approval page if Studio is hidden. New profiles start with the approved Tactical Ops artwork. Closing Studio hides it; **Menu → Quit** exits. `--studio` is available for development and accessibility testing.
 
@@ -19,3 +19,5 @@ Appearance, interests, activity counts, equipment and request records use the ex
 ## Community and funding
 
 Contributions are welcome, especially authored face/body layers, compatible rigs, contact animations and reproducible bug reports. No donation destination is configured until the maintainer supplies or activates one. Do not treat a repository URL as an active payment account.
+
+Beta 2 expands dependency-notice collection to the actual frozen module inventory, including optional installed libraries, and preserves license subdirectories. Runtime features are unchanged from beta 1.

@@ -18,7 +18,7 @@ def expected_errors(fn):
 
 
 def create_server(store):
-    server = MCPServer("Project Aura", version="0.7.0-beta.1", instructions=(
+    server = MCPServer("Project Aura", version="0.7.0-beta.2", instructions=(
         "Aura is a local avatar companion. Read aura_status before proposing changes. "
         "Tools only queue proposals; the user approves them in Aura's desktop window. "
         "Poll aura_request_status to learn the outcome. Do not claim a pending action succeeded."))
