@@ -1,6 +1,6 @@
 # Project Aura
 
-An open-source experiment in persistent AI embodiment. Give an AI a visual presence, a workspace and controlled ways to participate alongside you.
+A free, open-source experiment in persistent AI embodiment, supported by optional contributions. Give an AI a visual presence, a workspace and controlled ways to participate alongside you.
 
 Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
@@ -26,9 +26,19 @@ Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`,
 
 Project Aura is independent of OpenAI. Direct built-in ChatGPT Voice integration is **not implemented**. The beta does not control games, design CAD parts, generate complete new body rigs, or provide photorealistic/full-body action animation. The helicopter sequence is an original stylized 2D performance stage; it does not break desktop windows or launch other apps.
 
+## Free software, voluntary support
+
+Project Aura is being built for shared use, not the founder's personal profit. Official releases will remain free and open source: no paid editions, feature paywalls, required Aura subscriptions, microtransactions, or sales of outfits, powers and inventory items. Contributions do not buy privileged access or guaranteed feature delivery.
+
+Optional financial support is intended only for project costs, with transparent income-and-spending reports that protect contributors' private payment details. GitHub Sponsors signup is complete and awaiting review; financial support is not yet advertised as available. This commitment does not establish charitable or tax-exempt status.
+
+Optional third-party services may charge their own fees; integrations must disclose these before use. Locally supported features and locally saved creations must remain usable without an Aura payment or continued sponsorship. Third-party service availability and asset licenses still apply.
+
+This is the official project's operating commitment. The MIT license remains unchanged and permits commercial reuse by independent third parties; this policy does not impose additional license restrictions on them.
+
 ## Contribute
 
-See [Contributing](CONTRIBUTING.md), [creator item format](docs/creator-items-v1.md), [release notes and verification](docs/release-0.7.md), and [remaining work](docs/development-priorities.md). Example creator items are in `examples/creator-items/`. Donations are not configured in this build; no payment destination or campaign has been created.
+See [Contributing](CONTRIBUTING.md), [creator item format](docs/creator-items-v1.md), [release notes and verification](docs/release-0.7.md), and [remaining work](docs/development-priorities.md). Example creator items are in `examples/creator-items/`. GitHub Sponsors is awaiting review. See [voluntary support and funding status](docs/funding.md); code, art, testing and documentation contributions are welcome now.
 
 | Component | Purpose |
 | --- | --- |
