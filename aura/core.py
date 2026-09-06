@@ -317,7 +317,7 @@ class Store:
         state = self.read()
         if not state["bridge"]:
             raise AuraError("Enable the ChatGPT connection in Aura first.")
-        result = {"version": "0.7.0-beta.2", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
+        result = {"version": "0.7.0-beta.3", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
         if state["share"]:
             result["preferences"] = {"interests": state["interests"], "favorite_palette": state["favorite"]}
         return result

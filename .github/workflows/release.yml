@@ -20,6 +20,7 @@ jobs:
       - run: python -m pip install -c requirements-lock.txt -r requirements-desktop.txt -r requirements-mcp.txt -r requirements-build.txt -r requirements-media.txt
       - run: python -m unittest discover -s tests -v
       - run: python tools/build_windows.py
+      - run: python tools/packaged_mcp_smoke.py dist/ProjectAura/bridge/AuraMCP.exe
       - run: python tools/export_demo.py
       - run: python tools/create_release_kit.py
       - name: Write version

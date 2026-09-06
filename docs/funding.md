@@ -2,7 +2,7 @@
 
 The maintainer has completed GitHub Sponsors signup and reports that the application is awaiting GitHub review. On 2026-09-06 the public Sponsors address still redirected to the ordinary profile; sponsorship payments are not yet advertised as available.
 
-After approval, verify https://github.com/sponsors/Alexflu while signed out, then copy `examples/funding/FUNDING.yml` to `.github/FUNDING.yml`. The dashboard URL is private account administration and must not be used as the public funding link. No bank, identity, tax or payment details belong in this repository.
+The repository owner has enabled `.github/FUNDING.yml` for `Alexflu`. Signup is still reported as awaiting review; the presence of this file does not establish that payments are available. After approval, verify https://github.com/sponsors/Alexflu while signed out before announcing sponsorship availability. The dashboard URL is private account administration and must not be used as the public funding link. No bank, identity, tax or payment details belong in this repository.
 
 ## Proposed public description
 

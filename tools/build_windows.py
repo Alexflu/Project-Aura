@@ -87,7 +87,7 @@ for file in tray_dist.files or []:
     "modified sources, and run python tools/build_windows.py. "
     "Project Aura imposes no additional restriction on modifying or debugging this library.\n",
     encoding="utf-8")
-artifact = ROOT / "artifacts" / "ProjectAura-0.7.0-beta.2-windows-x64.zip"
+artifact = ROOT / "artifacts" / "ProjectAura-0.7.0-beta.3-windows-x64.zip"
 artifact.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(artifact, "w", zipfile.ZIP_DEFLATED) as archive:
     for file in sorted(bundle.rglob("*")):
