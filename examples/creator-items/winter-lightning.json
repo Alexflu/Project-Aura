@@ -1,0 +1,10 @@
+{
+  "id": "example.winter-lightning",
+  "name": "Winter Lightning",
+  "slot": "spell",
+  "kind": "lightning",
+  "color": "#88DDFF",
+  "schema": 1,
+  "author": "Project Aura example",
+  "license": "MIT"
+}

@@ -1,5 +1,7 @@
 """AuraShell: original, parameterized 2D artwork; no downloaded character assets."""
 import math
+import time
+from .motion import Motion
 import tkinter as tk
 
 PALETTES = {
@@ -87,7 +89,12 @@ def draw_avatar(canvas, look, tick=0, reduced=False):
             oval(x-4, 154, x+5, 169, fill=mid)
             oval(x-2, 156, x+3, 166, fill="#222333")
             oval(x-1, 156, x+2, 159, fill="#FFFFFF")
-    line(174, 185, 180, 188, 188, 184, fill="#A26368", smooth=True, width=2*scale)
+    level = getattr(canvas, "audio_level", None)
+    talking = level is not None and level > .16
+    if not reduced and (talking or (level is None and getattr(canvas, "expression", "idle") == "speaking" and tick % 8 < 5)):
+        oval(174, 181, 189, 193, fill="#713E55")
+    else:
+        line(174, 185, 180, 188, 188, 184, fill="#A26368", smooth=True, width=2*scale)
     oval(137, 173, 151, 179, fill="#DEA6A0")
     oval(214, 173, 228, 179, fill="#DEA6A0")
     accessory = look["accessory"]
@@ -109,21 +116,67 @@ class Avatar(tk.Canvas):
     def __init__(self, master, look, **kw):
         super().__init__(master, bg=BG, highlightthickness=0, **kw)
         self.look = look.copy()
+        self.expression = "idle"
+        self.audio_level = None
+        self.mood = "neutral"
+        self.effect = "solid"
+        self.arrival = -100
         self.reduced = False
         self.paused = False
+        self.motion = Motion()
+        self.pointer = 0
+        self.motion_strength = 1.0
+        self.last_frame = time.monotonic()
         self.tick = 2
         self.job = None
         self.bind("<Destroy>", self.stop)
+        self.bind("<Motion>", lambda e: setattr(self, "pointer", (e.x / max(1, self.winfo_width()) - .5) * 2))
+        self.bind("<Leave>", lambda e: setattr(self, "pointer", 0))
         self.animate()
 
     def animate(self):
         if self.winfo_exists():
+            now = time.monotonic()
+            if not self.winfo_viewable() or self.winfo_width() < 10 or self.winfo_height() < 10:
+                self.last_frame = now
+                self.job = self.after(33, self.animate)
+                return
+            self.motion.update(now - self.last_frame, self.audio_level, self.expression == "speaking",
+                               self.pointer, self.paused or self.reduced, self.mood)
+            self.last_frame = now
             if not self.paused and not self.reduced:
-                self.tick += 1
-            draw_avatar(self, self.look, self.tick, self.reduced or self.paused)
-            self.job = self.after(120 if not self.reduced and not self.paused else 750, self.animate)
+                self.tick = int(self.motion.time * 20) + 2
+            if getattr(self,"model",None) is not None:
+                from .models import draw
+                draw(self)
+            elif self.look["outfit"] in ("tactical", "stealth"):
+                from .illustrated import draw
+                draw(self)
+            else:
+                self.stage_key = None
+                draw_avatar(self, self.look, self.tick, self.reduced or self.paused)
+            from .presence import decorate
+            decorate(self)
+            wheel = getattr(self, "control_wheel", None)
+            if wheel and wheel.key is not None:
+                wheel.show()
+            interval = 33 if not self.reduced and not self.paused else 150
+            spent = int((time.monotonic() - now) * 1000)
+            # Let Tk finish mapping tabs/windows before the next expensive frame.
+            # Multiple animated surfaces can otherwise starve its idle geometry work.
+            self.job = self.after(max(16, interval - spent), self.defer_frame)
+
+    def defer_frame(self):
+        self.job = self.after_idle(self.animate)
 
     def stop(self, event=None):
         if self.job:
             self.after_cancel(self.job)
             self.job = None
+
+    def wake(self):
+        """Refresh a newly mapped surface without starting another timer loop."""
+        self.stop()
+        if self.winfo_exists():
+            self.last_frame = time.monotonic()
+            self.job = self.after_idle(self.animate)

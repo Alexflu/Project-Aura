@@ -1,0 +1,10 @@
+{
+  "id": "example.sunset-dagger",
+  "name": "Sunset Dagger",
+  "slot": "holster",
+  "kind": "dagger",
+  "color": "#FFAE7E",
+  "schema": 1,
+  "author": "Project Aura example",
+  "license": "MIT"
+}

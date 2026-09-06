@@ -13,11 +13,11 @@ from pathlib import Path
 OPTIONS = {
     "palette": ("violet", "ocean", "forest", "ember", "rose", "slate"),
     "hair": ("long", "bob", "pixie"),
-    "outfit": ("explorer", "engineer", "casual", "tactical"),
+    "outfit": ("explorer", "engineer", "casual", "tactical", "stealth"),
     "accessory": ("none", "headphones", "goggles", "leaf"),
     "silhouette": ("balanced", "compact", "tall"),
 }
-DEFAULT_LOOK = dict(zip(OPTIONS, ("violet", "long", "explorer", "none", "balanced")))
+DEFAULT_LOOK = dict(zip(OPTIONS, ("violet", "pixie", "tactical", "none", "balanced")))
 INTERESTS = ("making", "gaming", "music", "nature", "fitness", "art")
 INTEREST_LOOKS = {
     "making": {"outfit": "engineer", "accessory": "goggles", "palette": "ember"},
@@ -31,6 +31,20 @@ INTEREST_LOOKS = {
 
 class AuraError(ValueError):
     pass
+
+
+def validate_cue(value):
+    if not isinstance(value, dict) or set(value) != {"cue"} or value["cue"] not in ("entrance", "cast", "reveal", "stow", "wave", "inspect", "draw"):
+        raise AuraError("Choose entrance, cast, reveal, stow, wave, inspect or draw. Visual cues cannot execute commands.")
+    return dict(value)
+
+
+def validate_performance(value):
+    if (not isinstance(value, dict) or set(value) != {"text", "mood"} or
+            not isinstance(value["text"], str) or len(value["text"]) > 1000 or
+            value["mood"] not in ("neutral", "happy", "thoughtful", "focused", "sleepy")):
+        raise AuraError("Use a supported mood and up to 1,000 characters of speech text.")
+    return dict(value)
 
 
 def validate_look(value, partial=False):
@@ -217,8 +231,12 @@ class Store:
     def enqueue(self, kind, payload):
         if kind == "appearance":
             payload = validate_look(payload, partial=True)
+        elif kind == "performance":
+            payload = validate_performance(payload)
+        elif kind == "cue":
+            payload = validate_cue(payload)
         elif kind != "launch" or payload != {"app": "notepad"}:
-            raise AuraError("Unsupported action. Only appearance proposals and Notepad are available.")
+            raise AuraError("Unsupported action. Use appearance, speech/mood proposals, or Notepad.")
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             state = self._state(db)
@@ -251,7 +269,7 @@ class Store:
                 raise AuraError("Request not found.")
             return dict(row)
 
-    def resolve(self, request_id, accept, launcher):
+    def resolve(self, request_id, accept, launcher, performer=None):
         """Local UI only. Never registered as an MCP tool. Claims each request once."""
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -271,6 +289,9 @@ class Store:
                     status, result = "applied", "Appearance applied"
                 elif row["kind"] == "launch" and payload == {"app": "notepad"}:
                     status, result = "launching", "Launch approved; final outcome may be unknown if Aura exits"
+                elif row["kind"] in ("performance", "cue") and performer is not None:
+                    payload = validate_cue(payload) if row["kind"] == "cue" else validate_performance(payload)
+                    status, result = "performing", "Performance approved; outcome unknown if Aura exits"
                 else:
                     raise AuraError("Invalid stored action.")
             db.execute("UPDATE requests SET status=?,result=? WHERE id=?", (status, result, request_id))
@@ -282,13 +303,21 @@ class Store:
                 status, result = "failed", "Windows could not launch Notepad. No automatic retry."
             with self.connection() as db:
                 db.execute("UPDATE requests SET status=?,result=? WHERE id=?", (status, result, request_id))
+        elif status == "performing":
+            try:
+                result = performer(payload)
+                status = "submitted"
+            except Exception:
+                status, result = "failed", "Performance could not start. No automatic retry."
+            with self.connection() as db:
+                db.execute("UPDATE requests SET status=?,result=? WHERE id=?", (status, result, request_id))
         return result
 
     def public_state(self):
         state = self.read()
         if not state["bridge"]:
             raise AuraError("Enable the ChatGPT connection in Aura first.")
-        result = {"version": "0.1.0-beta.1", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
+        result = {"version": "0.7.0-beta.1", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
         if state["share"]:
             result["preferences"] = {"interests": state["interests"], "favorite_palette": state["favorite"]}
         return result

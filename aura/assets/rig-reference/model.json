@@ -1,0 +1,464 @@
+{
+  "schema": "aura-rig-1",
+  "id": "aura.reference",
+  "name": "Reference rig \u00b7 articulated mannequin",
+  "author": "Project Aura",
+  "license": "MIT",
+  "size": [
+    520,
+    760
+  ],
+  "bones": [
+    {
+      "name": "root",
+      "parent": null,
+      "position": [
+        260,
+        425
+      ],
+      "angle": 0
+    },
+    {
+      "name": "chest",
+      "parent": "root",
+      "position": [
+        0,
+        -155
+      ],
+      "angle": 0
+    },
+    {
+      "name": "head",
+      "parent": "chest",
+      "position": [
+        0,
+        -22
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_upper_arm",
+      "parent": "chest",
+      "position": [
+        -65,
+        7
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_forearm",
+      "parent": "left_upper_arm",
+      "position": [
+        0,
+        90
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_hand",
+      "parent": "left_forearm",
+      "position": [
+        0,
+        85
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_thigh",
+      "parent": "root",
+      "position": [
+        -34,
+        0
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_shin",
+      "parent": "left_thigh",
+      "position": [
+        0,
+        120
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_foot",
+      "parent": "left_shin",
+      "position": [
+        0,
+        118
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_thumb",
+      "parent": "left_hand",
+      "position": [
+        -12,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_index",
+      "parent": "left_hand",
+      "position": [
+        -4,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_middle",
+      "parent": "left_hand",
+      "position": [
+        4,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_ring",
+      "parent": "left_hand",
+      "position": [
+        12,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_upper_arm",
+      "parent": "chest",
+      "position": [
+        65,
+        7
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_forearm",
+      "parent": "right_upper_arm",
+      "position": [
+        0,
+        90
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_hand",
+      "parent": "right_forearm",
+      "position": [
+        0,
+        85
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_thigh",
+      "parent": "root",
+      "position": [
+        34,
+        0
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_shin",
+      "parent": "right_thigh",
+      "position": [
+        0,
+        120
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_foot",
+      "parent": "right_shin",
+      "position": [
+        0,
+        118
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_thumb",
+      "parent": "right_hand",
+      "position": [
+        -12,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_index",
+      "parent": "right_hand",
+      "position": [
+        -4,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_middle",
+      "parent": "right_hand",
+      "position": [
+        4,
+        20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_ring",
+      "parent": "right_hand",
+      "position": [
+        12,
+        20
+      ],
+      "angle": 0
+    }
+  ],
+  "layers": [
+    {
+      "bone": "left_upper_arm",
+      "asset": "left-upper.png",
+      "pivot": [
+        27,
+        15
+      ],
+      "z": 1
+    },
+    {
+      "bone": "left_forearm",
+      "asset": "left-forearm.png",
+      "pivot": [
+        25,
+        8
+      ],
+      "z": 3
+    },
+    {
+      "bone": "left_hand",
+      "asset": "left-palm.png",
+      "pivot": [
+        18,
+        3
+      ],
+      "z": 4
+    },
+    {
+      "bone": "left_thumb",
+      "asset": "left-thumb.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "left_index",
+      "asset": "left-index.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "left_middle",
+      "asset": "left-middle.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "left_ring",
+      "asset": "left-ring.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "left_thigh",
+      "asset": "left-thigh.png",
+      "pivot": [
+        33,
+        10
+      ],
+      "z": 0
+    },
+    {
+      "bone": "left_shin",
+      "asset": "left-shin.png",
+      "pivot": [
+        29,
+        8
+      ],
+      "z": 1
+    },
+    {
+      "bone": "left_foot",
+      "asset": "left-foot.png",
+      "pivot": [
+        32,
+        7
+      ],
+      "z": 3
+    },
+    {
+      "bone": "right_upper_arm",
+      "asset": "right-upper.png",
+      "pivot": [
+        27,
+        15
+      ],
+      "z": 1
+    },
+    {
+      "bone": "right_forearm",
+      "asset": "right-forearm.png",
+      "pivot": [
+        25,
+        8
+      ],
+      "z": 3
+    },
+    {
+      "bone": "right_hand",
+      "asset": "right-palm.png",
+      "pivot": [
+        18,
+        3
+      ],
+      "z": 4
+    },
+    {
+      "bone": "right_thumb",
+      "asset": "right-thumb.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "right_index",
+      "asset": "right-index.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "right_middle",
+      "asset": "right-middle.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "right_ring",
+      "asset": "right-ring.png",
+      "pivot": [
+        4,
+        1
+      ],
+      "z": 5
+    },
+    {
+      "bone": "right_thigh",
+      "asset": "right-thigh.png",
+      "pivot": [
+        33,
+        10
+      ],
+      "z": 0
+    },
+    {
+      "bone": "right_shin",
+      "asset": "right-shin.png",
+      "pivot": [
+        29,
+        8
+      ],
+      "z": 1
+    },
+    {
+      "bone": "right_foot",
+      "asset": "right-foot.png",
+      "pivot": [
+        32,
+        7
+      ],
+      "z": 3
+    },
+    {
+      "bone": "chest",
+      "asset": "torso.png",
+      "pivot": [
+        78,
+        25
+      ],
+      "z": 2
+    },
+    {
+      "bone": "head",
+      "asset": "head.png",
+      "pivot": [
+        60,
+        111
+      ],
+      "z": 4
+    }
+  ],
+  "sockets": {
+    "mouth": {
+      "bone": "head",
+      "position": [
+        0,
+        -17
+      ]
+    },
+    "hand_right": {
+      "bone": "right_hand",
+      "position": [
+        0,
+        15
+      ]
+    },
+    "holster_right": {
+      "bone": "root",
+      "position": [
+        65,
+        15
+      ]
+    },
+    "back": {
+      "bone": "root",
+      "position": [
+        65,
+        -20
+      ]
+    },
+    "charm": {
+      "bone": "chest",
+      "position": [
+        -110,
+        35
+      ]
+    },
+    "spell_origin": {
+      "bone": "left_hand",
+      "position": [
+        -38,
+        5
+      ]
+    }
+  }
+}

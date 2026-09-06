@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory() as temp:
     prepare_display()
     root = tk.Tk()
     app = App(root, Store(Path(temp) / "aura.db"))
-    root.update()
+    root.update_idletasks()
     app.preview_request()
     assert app.store.read()["look"]["hair"] == "long"
     app.apply_preview()
@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory() as temp:
     app.activity.set("making")
     app.record()
     app.toggle_float()
-    root.update()
+    root.update_idletasks()
     assert app.floating.winfo_exists()
     app.toggle_float()
     app.pause()
@@ -43,7 +43,7 @@ with tempfile.TemporaryDirectory() as temp:
         root.attributes("-topmost", True)
         for page, name in ((app.look_page, "appearance"), (app.prefs_page, "interests"), (app.connect_page, "connection"), (app.data_page, "data")):
             app.tabs.select(page)
-            root.update()
+            root.update_idletasks()
             root.after(300, root.quit)
             root.mainloop()
             import ctypes
