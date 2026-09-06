@@ -4,7 +4,7 @@ This beta imports local **2D PNG layer rigs**, not arbitrary VRM, Live2D, FBX or
 
 ## Author a pack
 
-Copy the reference folder, replace its transparent PNG layers with your own licensed artwork, and edit `model.json`. Import that manifest through **Models → Import model.json**. Only validated manifest data and declared PNGs are copied to a content-addressed folder beside the local profile. Selection is currently session-only. Restart restores default Aura; copied artwork remains available for reimport.
+Copy the reference folder, replace its transparent PNG layers with your own licensed artwork, and edit `model.json`. Import that manifest through **Models → Import model.json**. Only validated manifest data and declared PNGs are copied to a content-addressed folder beside the local profile. The Models library remembers your selection across launches, including the reference rig. Choose a saved row and click **Use selected model**, or double-click it. Reimporting the same content reuses its existing copy. Every selected pack is revalidated before rendering; missing or damaged packs fall back to default Aura at startup with a status message. **Restore default Aura** keeps your imported packs. **Forget my data and reset Aura** also clears the active selection, while retaining the artwork. Selection is stored beside the profile in a `.model.json` file; the library displays up to 128 imported packs.
 
 The manifest has exactly these fields: `schema` (`aura-rig-1`), `id` (lowercase slug), `name`, `author`, `license`, `size` ([width, height]), `bones`, `layers`, and `sockets`. Attribution fields describe the creator's declaration; the importer cannot verify ownership.
 

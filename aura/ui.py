@@ -30,7 +30,9 @@ class App:
         self.instance = None
         self.lifecycle_job = None
         self.app_meter = None
-        self.model = None
+        from .model_library import ModelLibrary
+        self.model_library = ModelLibrary(store.path)
+        self.model = self.model_library.restore()
         self.floating = None
         self.pending_ids = []
         self.poll_job = None
@@ -99,6 +101,9 @@ class App:
         self.build_models()
         self.build_data()
         self.load_preferences()
+        self.update_model_info()
+        if self.model_library.warning:
+            self.status.set(self.model_library.warning)
         self.sync_look()
         self.poll()
         self.voice_poll()
@@ -250,8 +255,7 @@ class App:
         self.sync_look()
         self.status.set("Previous appearance restored.")
 
-    def build_presence(self):
-        host = self.presence_page
+    def scrollable_content(self, host):
         viewport = tk.Canvas(host, bg=PANEL, highlightthickness=0)
         scrollbar = ttk.Scrollbar(host, orient="vertical", command=viewport.yview)
         scrollbar.pack(side="right", fill="y")
@@ -261,6 +265,10 @@ class App:
         window = viewport.create_window((0, 0), window=p, anchor="nw")
         p.bind("<Configure>", lambda event: viewport.configure(scrollregion=viewport.bbox("all")))
         viewport.bind("<Configure>", lambda event: viewport.itemconfigure(window, width=event.width))
+        return p
+
+    def build_presence(self):
+        p = self.scrollable_content(self.presence_page)
         self.label(p, "Voice & expression", size=17, bold=True).pack(anchor="w")
         self.paragraph(p, "Local speech, a chosen WAV, or experimental app-level metering. Mouth movement follows loudness; no microphone or transcript access.")
         row = tk.Frame(p, bg=PANEL)
@@ -455,43 +463,71 @@ class App:
         self.status.set("Playing the local Aura stage. Escape closes it; the tour previews do not change your saved look.")
 
     def build_models(self):
-        p=self.model_page
+        p=self.scrollable_content(self.model_page)
         self.label(p,"Models & shared animation",size=17,bold=True).pack(anchor="w")
         self.paragraph(p,"Aura Rig 1 accepts original PNG layers on named joints. Compatible bodies share idle, inspect, wave and draw motions. It does not yet import VRM, Live2D or arbitrary 3D files.")
         self.model_info=self.label(p,"Default illustrated / classic body",size=11,color=ACCENT)
         self.model_info.configure(wraplength=470);self.model_info.pack(anchor="w",pady=10)
-        self.button(p,"Import model.json…",self.import_model).pack(anchor="w",pady=5)
+        self.model_list=tk.Listbox(p,height=4,bg="#202A3D",fg=TEXT,selectbackground="#655493",
+                                   relief="flat",exportselection=False,font=("Segoe UI",10))
+        self.model_list.pack(fill="x",pady=5)
+        self.model_list.bind("<Double-Button-1>",lambda e:self.safe(self.choose_library_model))
+        self.model_list.bind("<Return>",lambda e:self.safe(self.choose_library_model))
+        self.refresh_model_library()
+        row=tk.Frame(p,bg=PANEL);row.pack(fill="x")
+        self.button(row,"Use selected model",self.choose_library_model).pack(side="left",padx=(0,8))
+        self.button(row,"Import model.json…",self.import_model).pack(side="left")
         self.button(p,"Open reference rig",self.use_reference_model).pack(anchor="w",pady=5)
         self.button(p,"Restore default Aura",self.clear_model).pack(anchor="w",pady=5)
         row=tk.Frame(p,bg=PANEL);row.pack(fill="x",pady=12)
         for motion in ("wave","inspect","draw"):
             self.button(row,motion.title(),lambda m=motion:self.play_model_motion(m)).pack(side="left",padx=(0,8))
-        self.paragraph(p,"The reference rig is a technical mannequin, not a replacement for Aura's approved artwork. Draw requires a holster item. Imported packs are copied locally; active selection is session-only in this first rig release. Restart returns to default Aura.")
+        self.paragraph(p,"The reference rig is a technical mannequin, not a replacement for Aura's approved artwork. Draw requires a holster item. Imported packs and your selection are saved locally. Restart restores your model; missing or damaged packs fall back to default Aura.")
         self.paragraph(p,"Compatibility depends on declared joints and sockets. Missing optional joints disable those motions; extra joints and custom art remain allowed. See docs/model-standard.md and the reference pack for authoring.")
+
+    def refresh_model_library(self):
+        self.model_entries=self.model_library.entries()
+        self.model_list.delete(0,tk.END)
+        for index,(key,label) in enumerate(self.model_entries):
+            self.model_list.insert(tk.END,label)
+            if key==self.model_library.selected:
+                self.model_list.selection_set(index)
+                self.model_list.see(index)
+
+    def update_model_info(self):
+        model=self.model
+        self.model_info.configure(text=(model.data["name"]+" · "+model.data["author"]+" · "+model.data["license"]+
+            "\nMotions: "+", ".join(model.capabilities)) if model else "Default illustrated / classic body")
 
     def set_model(self,model):
         self.model=model
-        self.model_info.configure(text=model.data["name"]+" · "+model.data["author"]+" · "+model.data["license"]+"\nMotions: "+", ".join(model.capabilities))
+        for surface in self.avatars():
+            surface.model_motion='idle'
+            surface.model_motion_started=-100
+        self.update_model_info()
+        self.refresh_model_library()
         self.sync_look()
+
+    def choose_library_model(self):
+        selection=self.model_list.curselection()
+        if not selection:raise AuraError("Select a model in the library first.")
+        key,_=self.model_entries[selection[0]]
+        self.set_model(self.model_library.choose(key))
+        self.status.set("Model selected and saved for next launch.")
 
     def import_model(self):
         path=filedialog.askopenfilename(parent=self.root,title="Choose Aura Rig 1 model",filetypes=[("Model manifest","*.json")])
         if path:
-            from .models import import_pack
-            copied,model=import_pack(path,self.store.path.with_suffix(".models"))
+            _,model=self.model_library.import_model(path)
             self.set_model(model)
-            self.status.set("Model validated and copied locally. Selected for this session.")
+            self.status.set("Model validated, copied to your library and saved for next launch.")
 
     def use_reference_model(self):
-        from .models import load_pack
-        model,_=load_pack(Path(__file__).with_name("assets")/"rig-reference"/"model.json")
-        self.set_model(model)
-        self.status.set("Reference rig loaded. Try Wave, Inspect, or equip a dagger and Draw.")
+        self.set_model(self.model_library.choose('@reference'))
+        self.status.set("Reference rig saved. Try Wave, Inspect, or equip a dagger and Draw.")
 
     def clear_model(self):
-        self.model=None
-        self.model_info.configure(text="Default illustrated / classic body")
-        self.sync_look()
+        self.set_model(self.model_library.choose(None))
 
     def play_model_motion(self,motion):
         if not self.model:raise AuraError("Choose a rigged model first.")
@@ -773,7 +809,7 @@ class App:
     def export(self):
         path = filedialog.asksaveasfilename(parent=self.root, title="Export Aura data", defaultextension=".json", initialfile="aura-preferences.json", filetypes=[("JSON", "*.json")])
         if path:
-            if Path(path).resolve() in (self.store.path.resolve(), self.inventory.path.resolve(), self.ui_preferences.path.resolve()):
+            if Path(path).resolve() in (self.store.path.resolve(), self.inventory.path.resolve(), self.ui_preferences.path.resolve(), self.model_library.settings.resolve()):
                 raise AuraError("Choose an export filename different from Aura's database.")
             Path(path).write_text(json.dumps({"schema": 1, "preferences": self.store.read(), "equipment": {"items": self.inventory.custom, "equipped": self.inventory.equipped}}, indent=2), encoding="utf-8")
             self.status.set("Preferences exported. Keep the file private if it contains personal interests.")
@@ -783,6 +819,7 @@ class App:
             self.stop_speech()
             self.speech_text.delete("1.0", "end")
             self.store.forget()
+            self.clear_model()
             self.inventory.reset()
             self.refresh_equipment()
             self.preview = None
