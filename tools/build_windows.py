@@ -41,6 +41,18 @@ for file in (Path(sys.base_prefix) / "tcl").rglob("license.terms"):
 # Preserve metadata and license texts for the portable bridge's dependency closure.
 from packaging.requirements import Requirement
 pending, seen = ["mcp", "pystray", "pycaw"], set()
+# Optional imports may be present in the build environment. Include notices for
+# distributions actually frozen by PyInstaller, not just declared root packages.
+import ast
+package_owners = importlib.metadata.packages_distributions()
+def collect_owners(value):
+    if isinstance(value, (tuple, list)):
+        if len(value) == 3 and isinstance(value[0], str) and isinstance(value[2], str) and value[2] in ("PYMODULE", "EXTENSION", "PYSOURCE"):
+            pending.extend(package_owners.get(value[0].split(".")[0], ()))
+        for child in value:
+            collect_owners(child)
+for name in ("ProjectAura", "AuraMCP"):
+    collect_owners(ast.literal_eval((ROOT / "build" / name / "Analysis-00.toc").read_text(encoding="utf-8")))
 while pending:
     name = pending.pop()
     if name.lower() in seen:
@@ -52,7 +64,10 @@ while pending:
     (directory / "METADATA.txt").write_text((dependency.read_text("METADATA") or dependency.metadata["Name"]), encoding="utf-8")
     for file in dependency.files or []:
         if "dist-info" in str(file) and any(word in file.name.lower() for word in ("license", "copying", "notice")):
-            target = directory / Path(str(file)).name
+            parts = Path(str(file)).parts
+            marker = next(i for i, part in enumerate(parts) if part.endswith(".dist-info"))
+            target = directory.joinpath(*parts[marker + 1:])
+            target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(dependency.locate_file(file), target)
     for spec in dependency.requires or []:
         requirement = Requirement(spec)
@@ -72,7 +87,7 @@ for file in tray_dist.files or []:
     "modified sources, and run python tools/build_windows.py. "
     "Project Aura imposes no additional restriction on modifying or debugging this library.\n",
     encoding="utf-8")
-artifact = ROOT / "artifacts" / "ProjectAura-0.7.0-beta.1-windows-x64.zip"
+artifact = ROOT / "artifacts" / "ProjectAura-0.7.0-beta.2-windows-x64.zip"
 artifact.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(artifact, "w", zipfile.ZIP_DEFLATED) as archive:
     for file in sorted(bundle.rglob("*")):
