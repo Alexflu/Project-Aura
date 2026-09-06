@@ -30,3 +30,7 @@ One supported app API at a time, with scoped authority, test fixtures, cancellat
 ## Research tracks
 
 Supported cooperative games, CAD workflows and hardware need separate platform terms, validation and physical safeguards. No dates or working integrations are implied here.
+
+## Standing product constraint
+
+Official Project Aura releases remain free and open source, with voluntary project-cost support rather than paid access or microtransactions. New integrations must disclose third-party charges and preserve payment-independent access to local features and creations. See the README funding commitment.

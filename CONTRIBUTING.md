@@ -11,3 +11,5 @@ Contributions to this repository are made under its [MIT License](LICENSE).
 Run `python -m unittest discover -s tests -v` before submitting changes; install `requirements-mcp.txt` to include the real protocol test. For UI changes run `python tools/gui_smoke.py` and inspect each tab. Include your OS, Python version and actual client version in compatibility reports. Use a temporary `--data` path for destructive tests. Do not attach your real preference database.
 
 Start with [ordered unfinished work](docs/development-priorities.md). Creator item authors can copy examples/creator-items and use the [v1 format](docs/creator-items-v1.md). Run tools/release_smoke.py for wheel/equipment/tour changes; never use your real profile for destructive tests. The optional media toolchain is requirements-media.txt and tools/export_demo.py.
+
+Design contributions around the [free-software and voluntary-support commitment](README.md#free-software-voluntary-support). Do not introduce paid feature gates, microtransactions or payment-dependent access to local creations. Disclose optional third-party service costs before use.
