@@ -1,74 +1,56 @@
 # Project Aura
 
-An open-source experiment in persistent AI embodiment.
+An open-source experiment in persistent AI embodiment. Give an AI a visual presence, a workspace and controlled ways to participate alongside you.
 
-Give an AI a workspace, visual presence, controlled computer access, and the ability to interact with software, games, hardware, and its environment while keeping the user in control.
+Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
-The goal: make AI feel less like an application you open and more like a collaborator that inhabits the computer with you.
+![Project Aura approved character direction](aura/assets/approved-direction.png)
 
-Desktop companion. Agent framework. Digital familiar. Occasionally arrives by helicopter.
+*Approved art direction; some pictured options remain planned. Working capabilities are listed below.*
 
-## Status
+[Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-**0.1.0-beta.1 — local Windows tester beta.** Aura now has an animated 2D avatar, a floating desktop window, bounded appearance customization, explicit-interest adaptation, persistent preferences, undo, and an optional MCP connection. Full 3D modeling, co-op play and CAD automation remain future work.
+## Windows beta 0.7.0-beta.1
 
-## Try the beta
+The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
-From a portable Windows build, extract the entire archive and open `ProjectAura.exe` inside its folder. Keep `_internal` alongside it. No Python installation or API key is needed for the desktop workbench. The build is unsigned and tested on the development host, not certified across clean machines.
+Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`, `bridge`, `docs` and `examples` in place. Close older Aura versions before opening the new build. Existing preferences remain in your Windows profile. The title bar shows the running version.
 
-From source, use Python 3.11 or newer with Tk installed (the Windows python.org installer includes it):
+- Aura starts floating with a tray icon. **Controls → Menu** opens Studio or hides/restores the tray icon. Relaunch Aura to recover Studio in the existing instance. **Menu → Quit** exits. Ctrl+Space works while Aura has focus; Shift-hover is optional.
+- Choose **Entrance & guided tour** for the 64-second local performance. Sound starts off. Pause, replay, close or use **Try this feature** to open the relevant controls. Tour previews do not overwrite your saved appearance.
+- Use **Appearance** for Tactical Ops / Stealth Striker, short or long hair, palettes and undo. Illustrated accessory and silhouette editing still need more artwork.
+- Use **Equipment** to equip or remove a dagger, satchel, focus and a fire/ice/lightning spell. Equipment is saved. Reveal/stow is a floating prop animation, not a rigged hand grip.
+- Use **Presence** for local speech or WAV playback. Selected-app level metering is experimental and not yet verified with ChatGPT Voice; it supplies loudness only.
+- Use **Models** to import an [Aura Rig 1](docs/model-standard.md) PNG layer pack or try the articulated reference mannequin. Shared wave/draw motions depend on compatible joints and sockets.
+- Use **Connection → Copy MCP setup** for this build and profile. `bridge/AuraMCP.exe` supplies the stdio server without a Python installation. Requests still need local approval.
 
-```powershell
-python run_aura.py
-```
+Project Aura is independent of OpenAI. Direct built-in ChatGPT Voice integration is **not implemented**. The beta does not control games, design CAD parts, generate complete new body rigs, or provide photorealistic/full-body action animation. The helicopter sequence is an original stylized 2D performance stage; it does not break desktop windows or launch other apps.
 
-1. In **Appearance**, choose a palette, hairstyle, outfit, accessory and silhouette. Preview, apply, or undo.
-2. In **Your interests**, save hobbies and a favorite palette, then **Suggest from interests**. Activity counts are entered by you. Automatic adaptation is optional and off by default.
-3. Choose **Float on desktop** to show Aura alongside your applications. **Pause Aura** stops adaptation and cancels pending remote requests.
-4. In **Connection**, try the approved Notepad launch. To connect ChatGPT, follow the separate [MCP setup guide](docs/chatgpt.md). The offline request field is keyword matching, not general AI chat.
+## Contribute
 
-State is local to your Windows account. Export preferences or reset them in **Your data**. See [testing and limitations](docs/testing.md).
-
-## The project
+See [Contributing](CONTRIBUTING.md), [creator item format](docs/creator-items-v1.md), [release notes and verification](docs/release-0.7.md), and [remaining work](docs/development-priorities.md). Example creator items are in `examples/creator-items/`. Donations are not configured in this build; no payment destination or campaign has been created.
 
 | Component | Purpose |
 | --- | --- |
-| **Project Aura** | Umbrella project and contributor community. |
-| **AuraOS** | Agent/runtime layer that hosts and manages Aura's operation. |
-| **AuraShell** | Desktop avatar, overlays, animation, and visual interactions with windows and icons. |
-| **AuraCore** | Orchestration, state, permissions, and task execution. |
-| **AuraBridge** | Integrations with Windows, apps, hardware, games, and CAD tools. |
+| Project Aura | Umbrella project and community |
+| AuraOS | Lifecycle and local runtime |
+| AuraShell | Avatar, controls, animation and performance stage |
+| AuraCore | State, permissions and request handling |
+| AuraBridge | Integrations with Windows, apps and future game/hardware/CAD adapters |
 
-Aura is the reference character. The architecture should accommodate other avatars and personalities.
+## Run and develop from source
 
-## What we want to build
-
-- A persistent desktop presence with expressive animation and optional voice interaction.
-- Useful computer assistance through explicit, scoped capabilities.
-- Visual performances that accompany real task progress: an arrival by helicopter can announce work, while task results remain verifiable independently of the animation.
-- Integrations that grow from desktop applications into CAD, hardware, and supported cooperative games.
-
-## What works and what comes next
-
-The beta opens Notepad only after approval and reports launch submission accurately. The official MCP SDK client/server round trip is tested; connection to a particular ChatGPT desktop account remains unverified. Appearance changes remodel the procedural avatar within supported parameters, not the language model.
-
-The [beta plan and risk register](docs/beta-plan.md) cover integration changes, privacy, asset rights, crashes, outages, 3D models, games, CAD, hardware, packaging and future distribution.
-
-## Develop and test
-
-The desktop has no third-party Python dependencies. The optional MCP adapter uses the official SDK:
+Use Python 3.11+ with Tk, then:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-mcp.txt
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe tools/gui_smoke.py
+python -m pip install -r requirements-desktop.txt -r requirements-mcp.txt
+python run_aura.py
+python -m unittest discover -s tests -v
+python tools/release_smoke.py
 ```
 
-Build a portable Windows executable with `requirements-build.txt` and `python tools/build_windows.py`. The full tested Windows dependency snapshot is `requirements-lock.txt`. See [testing](docs/testing.md) for details.
+Use `--data` with a temporary filename for isolated tests. Never commit real profile databases, credentials or private reference material. [MCP setup](docs/chatgpt.md) and [privacy](docs/release-0.7.md) explain the current boundaries.
 
-See [architecture](docs/architecture.md), [roadmap](docs/roadmap.md), and [contributing](CONTRIBUTING.md).
+To build Windows, install `requirements-build.txt` plus the desktop/MCP dependencies and run `python tools/build_windows.py`. To reproduce the video, install `requirements-media.txt`, generate narration with `python tools/create_tour_audio.py` on Windows, then run `python tools/export_demo.py`. Generated tour audio is already included for ordinary playback.
 
-## Open-source licensing
-
-Project Aura is licensed under the [MIT License](LICENSE).
+The portable build is unsigned and tested on the development Windows host; clean-machine and multi-monitor certification remain open. Source and original procedural assets use the [MIT license](LICENSE). Preserve [third-party notices](THIRD_PARTY_NOTICES.md).

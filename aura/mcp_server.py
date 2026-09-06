@@ -18,7 +18,7 @@ def expected_errors(fn):
 
 
 def create_server(store):
-    server = MCPServer("Project Aura", version="0.1.0-beta.1", instructions=(
+    server = MCPServer("Project Aura", version="0.7.0-beta.1", instructions=(
         "Aura is a local avatar companion. Read aura_status before proposing changes. "
         "Tools only queue proposals; the user approves them in Aura's desktop window. "
         "Poll aura_request_status to learn the outcome. Do not claim a pending action succeeded."))
@@ -36,13 +36,28 @@ def create_server(store):
     def aura_propose_appearance(
         palette: Literal["violet", "ocean", "forest", "ember", "rose", "slate"] | None = None,
         hair: Literal["long", "bob", "pixie"] | None = None,
-        outfit: Literal["explorer", "engineer", "casual", "tactical"] | None = None,
+        outfit: Literal["explorer", "engineer", "casual", "tactical", "stealth"] | None = None,
         accessory: Literal["none", "headphones", "goggles", "leaf"] | None = None,
         silhouette: Literal["balanced", "compact", "tall"] | None = None,
     ) -> dict:
         """Propose a bounded avatar change requested by the user or grounded in shared tastes. Queues local review; never applies automatically."""
         patch = {k: v for k, v in locals().items() if k in ("palette", "hair", "outfit", "accessory", "silhouette") and v is not None}
         return store.enqueue("appearance", patch)
+
+    @server.tool(annotations=write)
+    @expected_errors
+    def aura_propose_performance(
+        text: str = "",
+        mood: Literal["neutral", "happy", "thoughtful", "focused", "sleepy"] = "neutral",
+    ) -> dict:
+        """Queue text to speak with a local Windows voice and a mood cue. User must approve in Aura. Empty text changes only the session mood. Not built-in GPT Voice audio. Submitted means preparation started, not playback completed."""
+        return store.enqueue("performance", {"text": text, "mood": mood})
+
+    @server.tool(annotations=write)
+    @expected_errors
+    def aura_propose_cue(cue: Literal["entrance", "cast", "reveal", "stow", "wave", "inspect", "draw"]) -> dict:
+        """Queue a local visual cue for user approval. Cast/reveal need equipped items; wave/inspect/draw require a compatible imported rig, and draw needs a holster item. Entrance opens a performance stage. No files or applications are affected. Submitted means started, not completed."""
+        return store.enqueue("cue", {"cue": cue})
 
     @server.tool(annotations=write)
     @expected_errors

@@ -6,10 +6,13 @@ from pathlib import Path
 import subprocess
 import tempfile
 import time
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 parser = argparse.ArgumentParser()
 parser.add_argument("exe", type=Path)
 parser.add_argument("--screenshot", type=Path)
+parser.add_argument("--illustrated", action="store_true")
 args = parser.parse_args()
 user32 = ctypes.windll.user32
 user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
@@ -17,7 +20,11 @@ user32.IsWindowVisible.argtypes = [wintypes.HWND]
 user32.PostMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
 callback_type = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
 with tempfile.TemporaryDirectory() as temp:
-    proc = subprocess.Popen([str(args.exe.resolve()), "--data", str(Path(temp) / "state.db")])
+    if args.illustrated:
+        from aura.core import Store
+        store = Store(Path(temp) / "state.db")
+        store.apply(dict(store.read()["look"], outfit="stealth", hair="long"))
+    proc = subprocess.Popen([str(args.exe.resolve()), "--studio", "--data", str(Path(temp) / "state.db")])
     windows = []
     @callback_type
     def callback(hwnd, _):

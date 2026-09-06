@@ -8,12 +8,16 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--onedir", "--windowed",
-                "--noupx", "--name", "ProjectAura", "launch_desktop.py"], cwd=ROOT, check=True)
+subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--onedir", "--windowed",
+                "--add-data", "aura/assets;aura/assets", "--hidden-import", "pystray._win32", "--collect-submodules", "comtypes", "--noupx", "--name", "ProjectAura", "launch_desktop.py"], cwd=ROOT, check=True)
+subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "--onedir", "--console",
+                "--copy-metadata", "mcp", "--collect-data", "mcp", "--hidden-import", "anyio._backends._asyncio", "--noupx", "--name", "AuraMCP", "launch_mcp.py"], cwd=ROOT, check=True)
 bundle = ROOT / "dist" / "ProjectAura"
+shutil.copytree(ROOT / "dist" / "AuraMCP", bundle / "bridge", dirs_exist_ok=True)
 for filename in ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"):
     shutil.copy2(ROOT / filename, bundle / filename)
 shutil.copytree(ROOT / "docs", bundle / "docs", dirs_exist_ok=True)
+shutil.copytree(ROOT / "examples", bundle / "examples", dirs_exist_ok=True)
 licenses = bundle / "licenses"
 licenses.mkdir(exist_ok=True)
 python_license = Path(sys.base_prefix) / "LICENSE.txt"
@@ -26,11 +30,49 @@ dist = importlib.metadata.distribution("pyinstaller")
 for file in dist.files or []:
     if file.name == "COPYING.txt":
         shutil.copy2(dist.locate_file(file), licenses / "PyInstaller-COPYING.txt")
+pillow_dist = importlib.metadata.distribution("pillow")
+for file in pillow_dist.files or []:
+    if file.name == "LICENSE" and "dist-info" in str(file):
+        shutil.copy2(pillow_dist.locate_file(file), licenses / "Pillow-LICENSE.txt")
 shutil.copy2(ROOT / "third_party" / "Tcl-license.txt", licenses / "Tcl-license.txt")
 # Tcl/Tk license files are distributed with the installed Python runtime.
 for file in (Path(sys.base_prefix) / "tcl").rglob("license.terms"):
     shutil.copy2(file, licenses / (file.parent.name + "-license.txt"))
-artifact = ROOT / "artifacts" / "ProjectAura-0.1.0-beta.1-windows-x64.zip"
+# Preserve metadata and license texts for the portable bridge's dependency closure.
+from packaging.requirements import Requirement
+pending, seen = ["mcp", "pystray", "pycaw"], set()
+while pending:
+    name = pending.pop()
+    if name.lower() in seen:
+        continue
+    seen.add(name.lower())
+    dependency = importlib.metadata.distribution(name)
+    directory = licenses / dependency.metadata["Name"]
+    directory.mkdir(exist_ok=True)
+    (directory / "METADATA.txt").write_text((dependency.read_text("METADATA") or dependency.metadata["Name"]), encoding="utf-8")
+    for file in dependency.files or []:
+        if "dist-info" in str(file) and any(word in file.name.lower() for word in ("license", "copying", "notice")):
+            target = directory / Path(str(file)).name
+            shutil.copy2(dependency.locate_file(file), target)
+    for spec in dependency.requires or []:
+        requirement = Requirement(spec)
+        if not requirement.marker or requirement.marker.evaluate({"extra": ""}):
+            pending.append(requirement.name)
+# Include the exact LGPL tray library sources so recipients can modify/rebuild it.
+tray_dist = importlib.metadata.distribution("pystray")
+for file in tray_dist.files or []:
+    if str(file).replace("\\", "/").startswith("pystray/") and str(file).endswith(".py"):
+        target = licenses / "pystray" / "source" / str(file)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(tray_dist.locate_file(file), target)
+(licenses / "pystray" / "REBUILD.txt").write_text(
+    "Unmodified pystray 0.19.5 sources and GPL/LGPL notices are included. "
+    "To use a modified version, obtain Project Aura's matching source release, "
+    "install its build dependencies, replace pystray in that environment with your "
+    "modified sources, and run python tools/build_windows.py. "
+    "Project Aura imposes no additional restriction on modifying or debugging this library.\n",
+    encoding="utf-8")
+artifact = ROOT / "artifacts" / "ProjectAura-0.7.0-beta.1-windows-x64.zip"
 artifact.parent.mkdir(exist_ok=True)
 with zipfile.ZipFile(artifact, "w", zipfile.ZIP_DEFLATED) as archive:
     for file in sorted(bundle.rglob("*")):

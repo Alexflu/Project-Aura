@@ -1,0 +1,60 @@
+name: Build and publish beta
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [aura/__init__.py]
+permissions:
+  contents: read
+concurrency:
+  group: beta-release
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: python -m pip install -c requirements-lock.txt -r requirements-desktop.txt -r requirements-mcp.txt -r requirements-build.txt -r requirements-media.txt
+      - run: python -m unittest discover -s tests -v
+      - run: python tools/build_windows.py
+      - run: python tools/export_demo.py
+      - run: python tools/create_release_kit.py
+      - name: Write version
+        run: python -c "from aura import __version__; from pathlib import Path; Path('artifacts/version.txt').write_text(__version__)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-beta
+          path: |
+            artifacts/*-windows-x64.zip
+            artifacts/*.sha256
+            artifacts/*-source.zip
+            artifacts/*.mp4
+            artifacts/*.srt
+            artifacts/*.png
+            artifacts/release-manifest.json
+            artifacts/RELEASE-NOTES.md
+            artifacts/version.txt
+          if-no-files-found: error
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-beta
+          path: release
+      - name: Publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          version=$(cat release/version.txt)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]] || exit 1
+          gh release create "v$version" --target "$RELEASE_COMMIT" --prerelease --title "Project Aura $version" --notes-file release/RELEASE-NOTES.md release/*.zip release/*.sha256 release/*.mp4 release/*.srt release/*.png release/release-manifest.json
