@@ -10,11 +10,11 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 [Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-## Windows beta 0.7.0-beta.3
+## Windows beta 0.7.0-beta.4
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
-Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`, `bridge`, `docs` and `examples` in place. Close older Aura versions before opening the new build. Existing preferences remain in your Windows profile. The title bar shows the running version.
+Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`, `bridge`, `docs` and `examples` in place. Close older Aura versions before opening the new build. Existing preferences remain in your Windows profile. Starting with beta 4, opening the packaged app checks for a newer official release and switches to it after verification. No Windows startup task or background checker is installed. See [Updates](docs/updates.md) for offline use and disabling checks. The title bar shows the running version.
 
 - Aura starts floating with a tray icon. **Controls → Menu** opens Studio or hides/restores the tray icon. Relaunch Aura to recover Studio in the existing instance. **Menu → Quit** exits. Ctrl+Space works while Aura has focus; Shift-hover is optional.
 - Choose **Entrance & guided tour** for the 64-second local performance. Sound starts off. Pause, replay, close or use **Try this feature** to open the relevant controls. Tour previews do not overwrite your saved appearance.

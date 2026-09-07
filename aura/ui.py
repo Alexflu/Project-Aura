@@ -794,17 +794,27 @@ class App:
                     avatar.arrival = avatar.tick
 
     def build_data(self):
-        p = self.data_page
+        p = self.scrollable_content(self.data_page)
         self.label(p, "Your preferences, your control.", size=17, bold=True).pack(anchor="w")
         self.paragraph(p, "Aura stores appearance, up to 20 previous looks, selected interests, activity counts, settings and up to 100 request records (including proposed speech text) on this computer. There is no telemetry, microphone recording or screen capture.")
         self.paragraph(p, "Data is not encrypted. Other programs running as you may read it. Sharing through MCP is off by default; when enabled, tool inputs and results may be processed by your connected provider.")
         self.button(p, "Export my preferences", self.export).pack(anchor="w", pady=(0, 10))
         self.button(p, "Forget my data and reset Aura", self.forget).pack(anchor="w", pady=(0, 16))
         self.paragraph(p, "Reset clears Aura's local preferences, history and request records, and disables the connection. Imported model artwork, tray visibility, exports, backups and information shared with another service are retained.")
+        from .updater import enabled
+        self.auto_updates = tk.BooleanVar(value=enabled())
+        tk.Checkbutton(p, text="Check for updates when Aura opens", variable=self.auto_updates,
+                       command=lambda: self.safe(self.save_update_preference), bg=PANEL, fg=TEXT,
+                       selectcolor="#293348").pack(anchor="w")
         self.label(p, "Beta " + __version__, color=ACCENT, bold=True).pack(anchor="w", pady=(12, 0))
         self.paragraph(p, "This beta includes an illustrated sprite body and a classic procedural avatar. It does not edit AI model weights, generate 3D meshes, control games, or design machine parts. Project Aura is independent of OpenAI.")
         path = self.paragraph(p, "Local data: " + str(self.store.path))
         path.configure(wraplength=490)
+
+    def save_update_preference(self):
+        from .updater import set_enabled
+        set_enabled(self.auto_updates.get())
+        self.status.set("Update preference saved. Checks happen only when the packaged app opens; no Windows startup task.")
 
     def export(self):
         path = filedialog.asksaveasfilename(parent=self.root, title="Export Aura data", defaultextension=".json", initialfile="aura-preferences.json", filetypes=[("JSON", "*.json")])
