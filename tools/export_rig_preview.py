@@ -17,7 +17,7 @@ for motion in ('idle','bow','cast','wave','draw'):
         frame.alpha_composite(model.render(t,motion,equipment=BUILTINS[:4],
                                            cast=t if motion=='cast' else -1,clock=clock))
         ImageDraw.Draw(frame).text((18,height+10),model.data['name']+' : '+motion,fill='#D5C4FF')
-        frames.append(frame.convert('RGB').resize((400,500)))
+        frames.append(frame.convert('RGB').resize((400,round((height+40)*400/width)),Image.Resampling.LANCZOS))
         clock+=.1
 out=Path(sys.argv[2]) if len(sys.argv)>2 else Path('artifacts/shared-rig-motion.gif');out.parent.mkdir(exist_ok=True)
 frames[0].save(out,save_all=True,append_images=frames[1:],duration=100,loop=0)
