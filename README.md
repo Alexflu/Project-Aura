@@ -10,7 +10,7 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 [Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-## Windows beta 0.7.0-beta.4
+## Windows beta 0.7.0-beta.5
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
@@ -20,7 +20,7 @@ Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`,
 - Choose **Entrance & guided tour** for the 64-second local performance. Sound starts off. Pause, replay, close or use **Try this feature** to open the relevant controls. Tour previews do not overwrite your saved appearance.
 - Use **Appearance** for Tactical Ops / Stealth Striker, short or long hair, palettes and undo. Illustrated accessory and silhouette editing still need more artwork.
 - Use **Equipment** to equip or remove a dagger, satchel, focus and a fire/ice/lightning spell. Equipment is saved. Reveal/stow is a floating prop animation, not a rigged hand grip.
-- Use **Presence** for local speech or WAV playback. Selected-app level metering is experimental and not yet verified with ChatGPT Voice; it supplies loudness only.
+- Use **Presence** for local speech or WAV playback. Follow individual apps or Windows input/output devices, including line-in/out and virtual audio routes. Select a category, Refresh, choose a source and Follow selected. This supplies loudness only; see [audio routing](docs/audio-routing.md).
 - Use **Models** to import an [Aura Rig 1](docs/model-standard.md) PNG layer pack or try the articulated reference mannequin. Your selected model is saved across restarts and imported packs stay in the library. Shared wave/draw motions depend on compatible joints and sockets.
 - Use **Connection → Copy MCP setup** for this build and profile. `bridge/AuraMCP.exe` supplies the stdio server without a Python installation. Requests still need local approval.
 

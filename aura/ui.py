@@ -270,7 +270,7 @@ class App:
     def build_presence(self):
         p = self.scrollable_content(self.presence_page)
         self.label(p, "Voice & expression", size=17, bold=True).pack(anchor="w")
-        self.paragraph(p, "Local speech, a chosen WAV, or experimental app-level metering. Mouth movement follows loudness; no microphone or transcript access.")
+        self.paragraph(p, "Local speech, a chosen WAV, or selected app/device metering. Mouth movement follows loudness; no audio recording or transcript access.")
         row = tk.Frame(p, bg=PANEL)
         row.pack(fill="x")
         self.mood = tk.StringVar(value="neutral")
@@ -298,6 +298,7 @@ class App:
         row.pack(fill="x", pady=8)
         self.button(row, "Play a WAV…", self.play_wav).pack(side="left", padx=(0, 12))
         self.voice_state = self.label(row, "Silent", size=10, color=ACCENT)
+        self.voice_state.configure(wraplength=240)
         self.voice_state.pack(side="left")
         row = tk.Frame(p, bg=PANEL)
         row.pack(fill="x")
@@ -308,13 +309,29 @@ class App:
         self.level = ttk.Progressbar(row, maximum=1, length=70)
         self.level.pack(side="left", padx=8)
         self.paragraph(p, "WAV: 16-bit PCM, up to two minutes.")
-        audio_row = tk.Frame(p, bg=PANEL); audio_row.pack(fill="x", pady=4)
-        self.audio_apps = ttk.Combobox(audio_row, state="readonly", width=25)
-        self.audio_apps.pack(side="left", padx=(0, 6))
+        self.audio_kind = tk.StringVar(value="Applications")
+        kind = ttk.Combobox(p, textvariable=self.audio_kind, state="readonly",
+                            values=("Applications", "Output devices", "Input devices"), width=24)
+        kind.pack(anchor="w",pady=4)
+        kind.bind("<<ComboboxSelected>>",lambda e:self.safe(self.refresh_audio_apps))
+        listing=tk.Frame(p,bg=PANEL);listing.pack(fill="x")
+        self.audio_apps=tk.Listbox(listing,height=4,bg="#202A3D",fg=TEXT,
+            selectbackground="#655493",font=("Segoe UI",10),exportselection=False)
+        vertical=ttk.Scrollbar(listing,orient="vertical",command=self.audio_apps.yview)
+        vertical.pack(side="right",fill="y")
+        self.audio_apps.pack(side="left",fill="both",expand=True)
+        horizontal=ttk.Scrollbar(p,orient="horizontal",command=self.audio_apps.xview)
+        horizontal.pack(fill="x")
+        self.audio_apps.configure(xscrollcommand=horizontal.set,yscrollcommand=vertical.set)
+        self.audio_apps.bind("<<ListboxSelect>>",lambda e:self.describe_audio_source())
+        self.audio_details=self.paragraph(p,"Refresh to list sources. Select a row to see its full name.")
         self.audio_sessions = []
-        self.button(audio_row, "Refresh", self.refresh_audio_apps).pack(side="left")
-        self.button(audio_row, "Follow app", self.follow_audio_app).pack(side="left", padx=6)
-        self.paragraph(p, "Experimental: start app audio, Refresh, select its session, then Follow app. Stop disconnects. Notifications also move the mouth; words and emotion are unavailable.")
+        self.audio_list_kind = "Applications"
+        audio_row=tk.Frame(p,bg=PANEL);audio_row.pack(fill="x",pady=4)
+        self.button(audio_row,"Refresh",self.refresh_audio_apps).pack(side="left")
+        self.button(audio_row,"Follow selected",self.follow_audio_app).pack(side="left",padx=6)
+        self.button(audio_row,"Stop following",self.stop_speech).pack(side="left")
+        self.paragraph(p,"Inputs include line-in, microphones and virtual recording devices; outputs include speakers, line-out and virtual playback devices. Follow reads only the selected level meter, without recording. Some drivers require an active audio route; exclusive mode may report silence. Stop disconnects.")
         row = tk.Frame(p, bg=PANEL)
         row.pack(fill="x")
         self.button(row, "Dock left", lambda: self.dock_avatar("left")).pack(side="left", padx=(0, 8))
@@ -322,23 +339,33 @@ class App:
         self.button(row, "Play entrance", self.entrance).pack(side="left")
 
     def refresh_audio_apps(self):
-        from .app_audio import sessions
-        self.audio_sessions = sessions()
-        self.audio_apps.configure(values=[row[0] for row in self.audio_sessions])
-        self.audio_apps.set("")
-        self.status.set("Choose the app audio session you want Aura to follow. Metering is off until Follow app.")
+        from .app_audio import sessions, devices
+        kind=self.audio_kind.get()
+        rows=sessions() if kind=="Applications" else devices(0 if kind=="Output devices" else 1)
+        self.audio_sessions=rows
+        self.audio_list_kind=kind
+        self.audio_apps.delete(0,tk.END)
+        for label,_,_ in rows:self.audio_apps.insert(tk.END,label)
+        self.audio_details.configure(text="Select a source to see its full name." if rows else "No active sources found in this category. Check Windows audio devices and refresh.")
+        self.status.set("Listed "+kind.lower()+". Selection does not start metering; use Follow selected.")
+
+    def describe_audio_source(self):
+        selected=self.audio_apps.curselection()
+        if selected:
+            self.audio_details.configure(text=self.audio_list_kind+" · "+self.audio_sessions[selected[0]][0])
 
     def follow_audio_app(self):
         if self.store.read()["paused"]:
             raise AuraError("Resume Aura before following audio.")
-        index = self.audio_apps.current()
-        if index < 0:
-            raise AuraError("Refresh and choose an active app audio session first.")
-        from .app_audio import AppMeter
-        _, session, created = self.audio_sessions[index]
+        selected=self.audio_apps.curselection()
+        if not selected:
+            raise AuraError("Refresh and select an audio source first.")
+        from .app_audio import AppMeter, DeviceMeter
+        _, source, created=self.audio_sessions[selected[0]]
+        meter=AppMeter(source,created) if self.audio_list_kind=="Applications" else DeviceMeter(source)
         self.stop_speech()
-        self.app_meter = AppMeter(session, created)
-        self.status.set("Following " + self.app_meter.name + " audio level only. No recording or transcription. Stop disconnects.")
+        self.app_meter=meter
+        self.status.set("Following "+self.app_meter.name+" level only. No recording or transcription. Stop disconnects.")
 
     def apply_presence(self):
         for avatar in self.avatars():
