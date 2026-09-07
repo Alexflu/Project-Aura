@@ -1,4 +1,10 @@
-# 0.7.0-beta.3 — a persistent model library
+# 0.7.0-beta.4 — updates when Aura opens
+
+The Windows app now checks for newer official GitHub releases when opened. A verified download is unpacked beside the previous version and startup-tested before activation. Existing shortcuts keep working; the beta 4 MCP launcher follows the selected update without a network check. Offline checks, cancellation and failed validation preserve the installed app.
+
+There is no Windows login task, service or recurring background checker. **Your data → Check for updates when Aura opens** disables future checks; `--skip-update` opens that particular executable directly. This adds a GitHub network request at launch, without sending profile data. Beta 3 and older need one manual download of beta 4 to gain the updater. See [update behavior and recovery](updates.md).
+
+## Persistent model library
 
 Imported Aura Rig 1 models now appear in a local library. Select one once and Aura restores it on the next launch, including the floating avatar. Restore default Aura keeps your packs available. Reset clears the selection and retains imported artwork.
 
@@ -20,7 +26,7 @@ Local Windows speech and selected WAV playback remain available. The optional 0.
 
 ## Verification and limits
 
-58 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
+66 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
 
 ## Local data
 

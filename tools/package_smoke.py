@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory() as temp:
         from aura.core import Store
         store = Store(Path(temp) / "state.db")
         store.apply(dict(store.read()["look"], outfit="stealth", hair="long"))
-    proc = subprocess.Popen([str(args.exe.resolve()), "--studio", "--data", str(Path(temp) / "state.db")])
+    proc = subprocess.Popen([str(args.exe.resolve()), "--studio", "--skip-update", "--data", str(Path(temp) / "state.db")])
     windows = []
     @callback_type
     def callback(hwnd, _):
