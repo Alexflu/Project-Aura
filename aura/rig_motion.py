@@ -13,8 +13,8 @@ def angles(names, t, motion, clock):
     blend = envelope(t) if motion != 'idle' else 0
     result = {'chest': math.sin(clock * 1.7) * 1.1, 'head': math.sin(clock * .8) * 2}
     if motion == 'wave':
-        result.update(right_upper_arm=-135 * blend,
-                      right_forearm=(35 + math.sin(t * 9) * 18) * blend,
+        result.update(right_upper_arm=-65 * blend,
+                      right_forearm=(-95 + math.sin(t * 9) * 12) * blend,
                       right_hand=math.sin(t * 9) * 13 * blend)
         for i, name in enumerate(('thumb', 'index', 'middle', 'ring')):
             result['right_' + name] = math.sin(t * 8 + i * .4) * 5 * blend
@@ -28,7 +28,7 @@ def angles(names, t, motion, clock):
     elif motion == 'cast':
         result['chest'] -= 5 * blend
         result['head'] -= 7 * blend
-        result.update(left_upper_arm=110 * blend, left_forearm=-35 * blend,
+        result.update(left_upper_arm=35 * blend, left_forearm=105 * blend,
                       left_hand=-20 * blend, right_upper_arm=-12 * blend)
         for i, name in enumerate(('thumb', 'index', 'middle', 'ring')):
             result['left_' + name] = (-12 + i * 5) * blend

@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory() as temp:
     app.toggle_float()
     wait(root)
     assert app.avatar.model and app.float_avatar.model
-    assert len(app.model_entries) == 3
+    assert len(app.model_entries) == 4
     app.close()
 
     root = tk.Tk()
@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory() as temp:
     app.clear_model()
     assert app.model is None and app.avatar.model_motion == 'idle'
     app.model_list.selection_clear(0, tk.END)
-    app.model_list.selection_set(2)
+    app.model_list.selection_set(3)
     app.choose_library_model()
     assert app.model_library.selected == key
     manifest = app.model_library.path_for(key)

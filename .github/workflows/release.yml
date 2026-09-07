@@ -23,6 +23,7 @@ jobs:
       - run: python tools/updater_smoke.py
       - run: python tools/packaged_mcp_smoke.py dist/ProjectAura/bridge/AuraMCP.exe
       - run: python tools/export_demo.py
+      - run: python tools/export_rig_preview.py aura/assets/aura-illustrated-rig/model.json artifacts/aura-illustrated-motion.gif
       - run: python tools/create_release_kit.py
       - name: Write version
         run: python -c "from aura import __version__; from pathlib import Path; Path('artifacts/version.txt').write_text(__version__)"
@@ -36,6 +37,7 @@ jobs:
             artifacts/*.mp4
             artifacts/*.srt
             artifacts/*.png
+            artifacts/*.gif
             artifacts/release-manifest.json
             artifacts/RELEASE-NOTES.md
             artifacts/version.txt
@@ -59,4 +61,4 @@ jobs:
         run: |
           version=$(cat release/version.txt)
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]] || exit 1
-          gh release create "v$version" --target "$RELEASE_COMMIT" --prerelease --title "Project Aura $version" --notes-file release/RELEASE-NOTES.md release/*.zip release/*.sha256 release/*.mp4 release/*.srt release/*.png release/release-manifest.json
+          gh release create "v$version" --target "$RELEASE_COMMIT" --prerelease --title "Project Aura $version" --notes-file release/RELEASE-NOTES.md release/*.zip release/*.sha256 release/*.mp4 release/*.srt release/*.png release/*.gif release/release-manifest.json

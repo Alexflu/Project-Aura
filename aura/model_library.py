@@ -34,6 +34,8 @@ class ModelLibrary:
             return None
         if key == '@reference':
             return REFERENCE
+        if key == '@illustrated':
+            return REFERENCE.parent.parent / 'aura-illustrated-rig' / 'model.json'
         if not isinstance(key, str) or not PACK_ID.fullmatch(key):
             raise AuraError('Choose a model from the local library.')
         folder = self.directory / key
@@ -76,11 +78,11 @@ class ModelLibrary:
 
     def entries(self):
         """Read bounded labels only; selecting a row validates every declared asset."""
-        result = [(None, 'Default Aura'), ('@reference', 'Reference rig')]
+        result = [(None, 'Default Aura'), ('@reference', 'Reference rig'), ('@illustrated', 'Aura illustrated rig · preview')]
         if not self.directory.exists():
             return result
         for folder in sorted(self.directory.iterdir()):
-            if len(result) >= 130:
+            if len(result) >= 131:
                 break
             if not PACK_ID.fullmatch(folder.name):
                 continue

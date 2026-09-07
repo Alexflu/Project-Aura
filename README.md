@@ -10,7 +10,7 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 [Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-## Windows beta 0.7.0-beta.6
+## Windows beta 0.7.0-beta.7
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
@@ -21,7 +21,7 @@ Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`,
 - Use **Appearance** for Tactical Ops / Stealth Striker, short or long hair, palettes and undo. Illustrated accessory and silhouette editing still need more artwork.
 - Use **Equipment** to equip or remove a dagger, satchel, focus and a fire/ice/lightning spell. Equipment is saved. Reveal/stow is a floating prop animation, not a rigged hand grip.
 - Use **Presence** for local speech or WAV playback. Follow individual apps or Windows input/output devices, including line-in/out and virtual audio routes. Select a category, Refresh, choose a source and Follow selected. This supplies loudness only; see [audio routing](docs/audio-routing.md).
-- Use **Models** to import an [Aura Rig 1](docs/model-standard.md) PNG layer pack or try the articulated reference mannequin. Your selected model is saved across restarts and imported packs stay in the library. Shared wave/draw motions depend on compatible joints and sockets.
+- Use **Models → Try illustrated Aura rig** for the optional Stealth Striker body with articulated arms, waving, bowing, casting and a dagger draw. This preview still has a static face. You can also import an [Aura Rig 1](docs/model-standard.md) PNG layer pack or try the reference mannequin. Your selection is saved across restarts and imported packs stay in the library. Shared motions depend on compatible joints and sockets. See [illustrated rig notes](docs/illustrated-rig.md).
 - Use **Connection → Copy MCP setup** for this build and profile. `bridge/AuraMCP.exe` supplies the stdio server without a Python installation. Requests still need local approval.
 
 Project Aura is independent of OpenAI. Direct built-in ChatGPT Voice integration is **not implemented**. The beta does not control games, design CAD parts, generate complete new body rigs, or provide photorealistic/full-body action animation. The helicopter sequence is an original stylized 2D performance stage; it does not break desktop windows or launch other apps.
