@@ -1,4 +1,19 @@
-# 0.7.0-beta.5 — readable audio sources and device following
+# 0.7.0-beta.6 — shared gestures and secondary rig movement
+
+Compatible Aura Rig 1 models gain bow and casting gestures, smooth gesture
+blending against a continuous idle clock, and optional hair/cloth/gear movement
+using named joint roles. Equipment follows socket rotation; spell origins follow
+the casting hand. The reference mannequin demonstrates separate hair locks and
+coat tails. Existing packs remain valid; no new required manifest fields are
+introduced. Bow is also an approval-gated MCP cue.
+
+Tests cover proportional motion on a smaller model, missing optional joints,
+bounded secondary movement, gesture-to-idle continuity and Pause/Reduce motion.
+These changes apply to layered rigs. The approved illustrated body is unchanged;
+full physics, automatic rigging and arbitrary 3D retargeting remain unfinished.
+See [creator motion roles](model-standard.md#shared-motion-roles-beta-6).
+
+## Readable audio sources and device following
 
 Presence now lists Applications, Output devices and Input devices. Windows playback/recording endpoints include line-out, line-in and Voicemeeter-style virtual routes. The cramped popup is replaced with a full-width list, horizontal/vertical scrolling, and a wrapped full-name display. Refreshing and selecting do not start following; Follow selected explicitly connects and Stop following disconnects.
 
@@ -34,7 +49,7 @@ Local Windows speech and selected WAV playback remain available. The optional 0.
 
 ## Verification and limits
 
-68 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
+72 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
 
 ## Local data
 

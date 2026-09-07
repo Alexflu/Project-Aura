@@ -18,7 +18,7 @@ def expected_errors(fn):
 
 
 def create_server(store):
-    server = MCPServer("Project Aura", version="0.7.0-beta.5", instructions=(
+    server = MCPServer("Project Aura", version="0.7.0-beta.6", instructions=(
         "Aura is a local avatar companion. Read aura_status before proposing changes. "
         "Tools only queue proposals; the user approves them in Aura's desktop window. "
         "Poll aura_request_status to learn the outcome. Do not claim a pending action succeeded."))
@@ -55,8 +55,8 @@ def create_server(store):
 
     @server.tool(annotations=write)
     @expected_errors
-    def aura_propose_cue(cue: Literal["entrance", "cast", "reveal", "stow", "wave", "inspect", "draw"]) -> dict:
-        """Queue a local visual cue for user approval. Cast/reveal need equipped items; wave/inspect/draw require a compatible imported rig, and draw needs a holster item. Entrance opens a performance stage. No files or applications are affected. Submitted means started, not completed."""
+    def aura_propose_cue(cue: Literal["entrance", "cast", "reveal", "stow", "wave", "inspect", "draw", "bow"]) -> dict:
+        """Queue a local visual cue for user approval. Cast/reveal need equipped items; wave/inspect/draw/bow require a compatible imported rig, and draw needs a holster item. Entrance opens a performance stage. No files or applications are affected. Submitted means started, not completed."""
         return store.enqueue("cue", {"cue": cue})
 
     @server.tool(annotations=write)

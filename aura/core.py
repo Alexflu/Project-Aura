@@ -34,8 +34,8 @@ class AuraError(ValueError):
 
 
 def validate_cue(value):
-    if not isinstance(value, dict) or set(value) != {"cue"} or value["cue"] not in ("entrance", "cast", "reveal", "stow", "wave", "inspect", "draw"):
-        raise AuraError("Choose entrance, cast, reveal, stow, wave, inspect or draw. Visual cues cannot execute commands.")
+    if not isinstance(value, dict) or set(value) != {"cue"} or value["cue"] not in ("entrance", "cast", "reveal", "stow", "wave", "inspect", "draw", "bow"):
+        raise AuraError("Choose entrance, cast, reveal, stow, wave, inspect, draw or bow. Visual cues cannot execute commands.")
     return dict(value)
 
 
@@ -317,7 +317,7 @@ class Store:
         state = self.read()
         if not state["bridge"]:
             raise AuraError("Enable the ChatGPT connection in Aura first.")
-        result = {"version": "0.7.0-beta.5", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
+        result = {"version": "0.7.0-beta.6", "paused": state["paused"], "appearance": state["look"], "choices": OPTIONS}
         if state["share"]:
             result["preferences"] = {"interests": state["interests"], "favorite_palette": state["favorite"]}
         return result

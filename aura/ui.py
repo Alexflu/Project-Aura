@@ -396,7 +396,7 @@ class App:
                 self.entrance()
             elif cue == "cast":
                 self.cast_spell()
-            elif cue in ("wave", "inspect", "draw"):
+            elif cue in ("wave", "inspect", "draw", "bow"):
                 self.play_model_motion(cue)
             else:
                 self.require_effects()
@@ -492,7 +492,7 @@ class App:
     def build_models(self):
         p=self.scrollable_content(self.model_page)
         self.label(p,"Models & shared animation",size=17,bold=True).pack(anchor="w")
-        self.paragraph(p,"Aura Rig 1 accepts original PNG layers on named joints. Compatible bodies share idle, inspect, wave and draw motions. It does not yet import VRM, Live2D or arbitrary 3D files.")
+        self.paragraph(p,"Aura Rig 1 accepts original PNG layers on named joints. Compatible bodies share idle, inspect, wave, draw, bow and casting motions. It does not yet import VRM, Live2D or arbitrary 3D files.")
         self.model_info=self.label(p,"Default illustrated / classic body",size=11,color=ACCENT)
         self.model_info.configure(wraplength=470);self.model_info.pack(anchor="w",pady=10)
         self.model_list=tk.Listbox(p,height=4,bg="#202A3D",fg=TEXT,selectbackground="#655493",
@@ -507,7 +507,7 @@ class App:
         self.button(p,"Open reference rig",self.use_reference_model).pack(anchor="w",pady=5)
         self.button(p,"Restore default Aura",self.clear_model).pack(anchor="w",pady=5)
         row=tk.Frame(p,bg=PANEL);row.pack(fill="x",pady=12)
-        for motion in ("wave","inspect","draw"):
+        for motion in ("wave","inspect","draw","bow"):
             self.button(row,motion.title(),lambda m=motion:self.play_model_motion(m)).pack(side="left",padx=(0,8))
         self.paragraph(p,"The reference rig is a technical mannequin, not a replacement for Aura's approved artwork. Draw requires a holster item. Imported packs and your selection are saved locally. Restart restores your model; missing or damaged packs fall back to default Aura.")
         self.paragraph(p,"Compatibility depends on declared joints and sockets. Missing optional joints disable those motions; extra joints and custom art remain allowed. See docs/model-standard.md and the reference pack for authoring.")
@@ -551,7 +551,7 @@ class App:
 
     def use_reference_model(self):
         self.set_model(self.model_library.choose('@reference'))
-        self.status.set("Reference rig saved. Try Wave, Inspect, or equip a dagger and Draw.")
+        self.status.set("Reference rig saved. Try Wave or Bow; equip a dagger to Draw or a spell to Cast.")
 
     def clear_model(self):
         self.set_model(self.model_library.choose(None))
@@ -638,6 +638,8 @@ class App:
         self.require_effects()
         if "spell" not in self.inventory.equipped:
             raise AuraError("Equip a spell first.")
+        if self.model and "cast" in self.model.capabilities:
+            self.play_model_motion("cast")
         for avatar in self.avatars():
             avatar.cast_started = avatar.motion.time
         self.status.set("Casting a local visual spell. No application or file is affected.")

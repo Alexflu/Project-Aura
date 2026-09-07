@@ -5,7 +5,7 @@
   "author": "Project Aura",
   "license": "MIT",
   "size": [
-    520,
+    640,
     760
   ],
   "bones": [
@@ -13,7 +13,7 @@
       "name": "root",
       "parent": null,
       "position": [
-        260,
+        320,
         425
       ],
       "angle": 0
@@ -213,6 +213,60 @@
       "position": [
         12,
         20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "hair_back",
+      "parent": "head",
+      "position": [
+        0,
+        -93
+      ],
+      "angle": 0
+    },
+    {
+      "name": "hair_front",
+      "parent": "head",
+      "position": [
+        -39,
+        -65
+      ],
+      "angle": 0
+    },
+    {
+      "name": "cloth_left",
+      "parent": "root",
+      "position": [
+        -28,
+        -91
+      ],
+      "angle": 0
+    },
+    {
+      "name": "cloth_right",
+      "parent": "root",
+      "position": [
+        28,
+        -91
+      ],
+      "angle": 0
+    },
+    {
+      "name": "gear_back",
+      "parent": "root",
+      "position": [
+        65,
+        -20
+      ],
+      "angle": 0
+    },
+    {
+      "name": "gear_charm",
+      "parent": "chest",
+      "position": [
+        -110,
+        35
       ],
       "angle": 0
     }
@@ -415,6 +469,42 @@
         111
       ],
       "z": 4
+    },
+    {
+      "bone": "hair_back",
+      "asset": "hair-back.png",
+      "pivot": [
+        65,
+        10
+      ],
+      "z": -2
+    },
+    {
+      "bone": "hair_front",
+      "asset": "hair-front.png",
+      "pivot": [
+        13,
+        0
+      ],
+      "z": 6
+    },
+    {
+      "bone": "cloth_left",
+      "asset": "coat-left.png",
+      "pivot": [
+        35,
+        0
+      ],
+      "z": -1
+    },
+    {
+      "bone": "cloth_right",
+      "asset": "coat-right.png",
+      "pivot": [
+        35,
+        0
+      ],
+      "z": -1
     }
   ],
   "sockets": {
@@ -440,24 +530,24 @@
       ]
     },
     "back": {
-      "bone": "root",
+      "bone": "gear_back",
       "position": [
-        65,
-        -20
+        0,
+        0
       ]
     },
     "charm": {
-      "bone": "chest",
+      "bone": "gear_charm",
       "position": [
-        -110,
-        35
+        0,
+        0
       ]
     },
     "spell_origin": {
       "bone": "left_hand",
       "position": [
-        -38,
-        5
+        0,
+        15
       ]
     }
   }

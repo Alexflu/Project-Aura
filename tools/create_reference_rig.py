@@ -11,7 +11,7 @@ def part(name,joint,size,pivot,z,draw):
     im=Image.new('RGBA',size);draw(ImageDraw.Draw(im));im.save(ROOT/(name+'.png'))
     layers.append(dict(bone=joint,asset=name+'.png',pivot=list(pivot),z=z))
 
-bone('root',None,260,425)
+bone('root',None,320,425)
 bone('chest','root',0,-155)
 bone('head','chest',0,-22)
 for side,sign in [('left',-1),('right',1)]:
@@ -32,9 +32,19 @@ for side,sign in [('left',-1),('right',1)]:
     part(side+'-foot',side+'_foot',(70,54),(32,7),3,lambda d:(d.rounded_rectangle((4,2,65,48),10,fill='#212636',outline='#9787B8',width=2),d.line((8,39,62,39),fill='#A386DA',width=3)))
 part('torso','chest',(156,190),(78,25),2,lambda d:(d.polygon((28,8,128,8,146,48,122,166,34,166,10,48),fill='#2E344C',outline='#A8A1C2'),d.polygon((39,35,117,35,111,106,45,106),fill='#4B446B'),d.line((78,30,78,154),fill='#9082B6',width=3),d.ellipse((63,48,93,78),fill='#AC8CF0',outline='#DBD2F6',width=2),d.rounded_rectangle((34,145,123,169),4,fill='#1D2332',outline='#A1A7BD',width=2)))
 part('head','head',(120,134),(60,111),4,lambda d:(d.rounded_rectangle((20,18,100,115),30,fill='#77758E',outline='#C9C5D9',width=2),d.polygon((16,24,39,5,89,9,108,39,92,55,27,53),fill='#2B2C44',outline='#B3A0D8'),d.rounded_rectangle((30,55,90,73),7,fill='#131E30',outline='#9280B8'),d.line((36,63,50,63),fill='#98F3F1',width=4),d.line((69,63,84,63),fill='#98F3F1',width=4),d.line((48,94,72,94),fill='#322B4B',width=2)))
-data=dict(schema='aura-rig-1',id='aura.reference',name='Reference rig · articulated mannequin',author='Project Aura',license='MIT',size=[520,760],bones=bones,layers=layers,sockets={
+# Optional semantic joints demonstrate shared secondary motion without new schema fields.
+bone('hair_back','head',0,-93)
+part('hair-back','hair_back',(130,145),(65,10),-2,lambda d:d.polygon((24,8,105,8,119,72,109,135,85,102,63,142,38,105,17,124,8,58),fill='#302A49',outline='#9479B5'))
+bone('hair_front','head',-39,-65)
+part('hair-front','hair_front',(26,92),(13,0),6,lambda d:d.polygon((7,0,23,1,24,55,15,89,9,59,2,72,1,18),fill='#514066',outline='#B697DA'))
+for side,sign in [('left',-1),('right',1)]:
+    bone('cloth_'+side,'root',sign*28,-91)
+    part('coat-'+side,'cloth_'+side,(70,155),(35,0),-1,lambda d:d.polygon((8,0,61,0,63,110,48,151,16,130,3,52),fill='#30354E',outline='#AA90CB'))
+bone('gear_back','root',65,-20)
+bone('gear_charm','chest',-110,35)
+data=dict(schema='aura-rig-1',id='aura.reference',name='Reference rig · articulated mannequin',author='Project Aura',license='MIT',size=[640,760],bones=bones,layers=layers,sockets={
  'mouth':dict(bone='head',position=[0,-17]),'hand_right':dict(bone='right_hand',position=[0,15]),
- 'holster_right':dict(bone='root',position=[65,15]),'back':dict(bone='root',position=[65,-20]),
- 'charm':dict(bone='chest',position=[-110,35]),'spell_origin':dict(bone='left_hand',position=[-38,5])})
+ 'holster_right':dict(bone='root',position=[65,15]),'back':dict(bone='gear_back',position=[0,0]),
+ 'charm':dict(bone='gear_charm',position=[0,0]),'spell_origin':dict(bone='left_hand',position=[0,15])})
 (ROOT/'model.json').write_text(json.dumps(data,indent=2),encoding='utf-8')
 print('Generated original reference rig:',len(bones),'joints',len(layers),'layers')
