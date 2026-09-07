@@ -24,6 +24,7 @@ jobs:
       - run: python tools/packaged_mcp_smoke.py dist/ProjectAura/bridge/AuraMCP.exe
       - run: python tools/export_demo.py
       - run: python tools/export_rig_preview.py aura/assets/aura-illustrated-rig/model.json artifacts/aura-illustrated-motion.gif
+      - run: python tools/export_music_preview.py
       - run: python tools/create_release_kit.py
       - name: Write version
         run: python -c "from aura import __version__; from pathlib import Path; Path('artifacts/version.txt').write_text(__version__)"

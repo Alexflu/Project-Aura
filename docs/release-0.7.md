@@ -1,3 +1,28 @@
+# 0.7.0-beta.8 — optional music reactions
+
+Choose a layered model in Models, then select a Music reaction in Presence and
+Follow your music app or an input/output device. Gentle nod, Dance + speakers,
+Headbang and Headphones + book are session choices. Loudness smoothly changes
+movement intensity; silence settles energetic poses. The reading pose remains
+while the selected source is followed, even during quiet passages.
+
+Music does not animate the mouth. Stop following disconnects it; Pause and Reduce
+motion suppress the reaction. Explicit rig actions temporarily take priority.
+Speakers, headphones and the book are temporary drawn props; no saved inventory
+or appearance is changed. Compatible creator rigs share the named-joint poses.
+
+This first implementation uses a stylized rhythm. It does not detect genre, tempo,
+beats or songs, record audio, or add a music-service connection. The book pose does
+not yet include putting on the headphones, turning pages or reading real text.
+Clothing changes and full dance choreography remain future work. The original
+single-image Default Aura does not support these rig reactions.
+
+The release includes an actual-renderer GIF using simulated loudness. Reproduce it
+with `python tools/export_music_preview.py` before building the release kit.
+
+80 unit/protocol tests pass, including level smoothing, silence/disconnect,
+non-finite input, gesture priority, pause and cross-model proportions.
+
 # 0.7.0-beta.7 — illustrated Aura body-rig preview
 
 **Models → Try illustrated Aura rig** loads a new layered Stealth Striker body
@@ -71,7 +96,7 @@ Local Windows speech and selected WAV playback remain available. The optional 0.
 
 ## Verification and limits
 
-76 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
+80 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
 
 ## Local data
 
