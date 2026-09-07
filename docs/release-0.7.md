@@ -1,4 +1,12 @@
-# 0.7.0-beta.4 — updates when Aura opens
+# 0.7.0-beta.5 — readable audio sources and device following
+
+Presence now lists Applications, Output devices and Input devices. Windows playback/recording endpoints include line-out, line-in and Voicemeeter-style virtual routes. The cramped popup is replaced with a full-width list, horizontal/vertical scrolling, and a wrapped full-name display. Refreshing and selecting do not start following; Follow selected explicitly connects and Stop following disconnects.
+
+Device following reads only the Windows peak meter. It does not record PCM, change audio routing or infer words/emotions. A silent meter can depend on the driver, route activity or exclusive-mode limitations. See [audio routing](audio-routing.md). Live enumeration and meter reads succeeded on 11 input and 11 output endpoints on the development machine; this does not verify a physical signal through every port.
+
+Beta 4 users can close Aura and open their usual updater-enabled executable to receive this release.
+
+## Updates when Aura opens
 
 The Windows app now checks for newer official GitHub releases when opened. A verified download is unpacked beside the previous version and startup-tested before activation. Existing shortcuts keep working; the beta 4 MCP launcher follows the selected update without a network check. Offline checks, cancellation and failed validation preserve the installed app.
 
@@ -20,13 +28,13 @@ Aura starts as a floating companion with a system tray icon. Studio opens when r
 
 The first [Aura Rig 1 importer](model-standard.md) accepts local PNG layers, named joints and attachment sockets. The included reference mannequin demonstrates idle, inspection, wave, articulated fingers and a hand-to-holster draw. It is not a replacement for Aura's approved illustrated artwork. Model selection is saved across restarts in beta 3. VRM, Live2D, arbitrary 3D imports and interchangeable apparel packs remain unfinished.
 
-Presence adds **experimental selected-app audio-level metering** on Windows. Start sound in the desired app, Refresh, choose its process/output session and Follow app. Stop, Pause, local speech, WAV playback or mouth preview disconnect it. This reads a peak meter, without recording PCM, microphone sound or transcripts. Notifications can also animate the mouth. No phoneme timing or automatic emotion inference is provided. Windows routing and app session availability can prevent connection. A live test verified silence and a nonzero signal from a selected muted test process, without PCM capture. This is not yet verified end-to-end ChatGPT Voice synchronization.
+Presence adds **experimental selected-app audio-level metering** on Windows. Start sound in the desired app, Refresh, choose Applications, then its process/output session and Follow selected. Stop, Pause, local speech, WAV playback or mouth preview disconnect it. This reads a peak meter, without recording PCM, microphone sound or transcripts. Notifications can also animate the mouth. No phoneme timing or automatic emotion inference is provided. Windows routing and app session availability can prevent connection. A live test verified silence and a nonzero signal from a selected muted test process, without PCM capture. This is not yet verified end-to-end ChatGPT Voice synchronization.
 
 Local Windows speech and selected WAV playback remain available. The optional 0.6 helicopter tour and demo use the existing illustrated performance renderer; they do not demonstrate the new rig or a custom model's entrance.
 
 ## Verification and limits
 
-66 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
+68 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
 
 ## Local data
 

@@ -7,7 +7,7 @@ from unittest.mock import Mock
 from aura.models import load_pack, import_pack
 from aura.tray import Preferences, Instance
 from aura.core import AuraError
-from aura.app_audio import AppMeter
+from aura.app_audio import AppMeter, DeviceMeter, devices
 
 REFERENCE=Path(__file__).resolve().parents[1]/'aura/assets/rig-reference/model.json'
 
@@ -71,5 +71,17 @@ class MeterTests(unittest.TestCase):
             meter.meter.GetPeakValue.return_value=raw;self.assertEqual(meter.level(),want)
         meter.process.create_time.return_value=2
         with self.assertRaises(AuraError):meter.level()
+
+    def test_device_meter_bounds_and_disconnect(self):
+        meter=DeviceMeter.__new__(DeviceMeter);meter.device=Mock();meter.meter=Mock()
+        meter.device._dev.GetState.return_value=1
+        for raw,want in ((.2,.5),(4,1),(-1,0),(float('nan'),0),(float('inf'),0)):
+            meter.meter.GetPeakValue.return_value=raw
+            self.assertEqual(meter.level(),want)
+        meter.device._dev.GetState.return_value=4
+        with self.assertRaises(AuraError):meter.level()
+
+    def test_device_flow_validation(self):
+        with self.assertRaises(AuraError):devices(3)
 
 if __name__=='__main__':unittest.main()
