@@ -23,3 +23,33 @@ Draw requires the right arm chain plus `hand_right` and `holster_right` sockets.
 Arbitrary extra joints and artwork are allowed within limits, but they do not automatically gain shared animations. Apparel is not yet a swappable layer-pack format. Existing inventory imports describe procedural items and spells. Future mesh/VRM adapters need their own versioned profile, expression mapping, attachment rules and validation; they must not silently reinterpret this format.
 
 Connected MCP clients can propose `wave`, `inspect` or `draw` through `aura_propose_cue`. Each still requires local approval and a currently selected compatible rig. Draw is a complete draw-and-stow cycle; persistent reveal/stow remains specific to the illustrated renderer.
+
+
+## Shared motion roles (beta 6)
+
+Existing Aura Rig 1 packs remain valid. Bow uses chest/head and optional arms;
+casting uses left_upper_arm, left_forearm and left_hand. Shared arm gestures
+expect the documented downward neutral arm pose, with forearm parented to upper
+arm and hand parented to forearm. Cast spell in Equipment also plays the arm
+motion when available. Bow is available in Models and as an approval-gated MCP
+cue. Missing optional joints disable the corresponding arm gesture.
+
+For secondary motion, name optional joints `hair_<name>`, `cloth_<name>` or
+`gear_<name>` (for example hair_front, cloth_left, gear_back). Attach these joints
+to the appropriate head/body/limb parent and assign PNG layers normally. They
+receive small bounded angular offsets with varied phases and gesture response.
+All positions inherit the pack's own hierarchy and proportions; no fixed image
+coordinates are needed. These reserved prefixes opt in; use another prefix for
+parts that must remain rigid. Extra joints still count toward the 48-joint limit.
+
+Equipment sockets inherit joint translation and rotation. A bag can attach to
+gear_back; a charm can attach to gear_charm. Spell particles follow spell_origin
+while retaining screen-upright rendering. The reference mannequin now includes
+separate hair locks, coat tails and gear joints as reusable examples. Its art is
+technical demonstration material, not Aura's approved illustrated body.
+
+Movement is procedural and bounded, not collision-aware cloth/hair physics.
+There is no automatic rigging or arbitrary 3D animation retargeting. Pause and
+Reduce motion freeze the added movement. Existing PNG artwork needs separate
+layers/joints to articulate; a single full-body image cannot gain independent
+hands, clothing and hair merely by adopting these names.

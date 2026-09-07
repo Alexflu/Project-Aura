@@ -14,7 +14,7 @@ REFERENCE=Path(__file__).resolve().parents[1]/'aura/assets/rig-reference/model.j
 class RigTests(unittest.TestCase):
     def test_shared_motions_and_contact(self):
         model,_=load_pack(REFERENCE)
-        self.assertEqual(set(model.capabilities),{'idle','inspect','wave','draw'})
+        self.assertEqual(set(model.capabilities),{'idle','inspect','wave','draw','bow','cast'})
         idle=model.render(0)
         wave=model.render(1,'wave')
         self.assertNotEqual(idle.tobytes(),wave.tobytes())

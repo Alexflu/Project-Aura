@@ -10,7 +10,7 @@ import tempfile
 from PIL import Image
 from .core import AuraError
 
-MOTIONS=('idle','wave','inspect','draw')
+MOTIONS=('idle','wave','inspect','draw','bow','cast')
 MAX_PIXELS=16_000_000
 
 
@@ -92,7 +92,8 @@ class Model:
 
     @property
     def capabilities(self):
-        caps=['idle','inspect']
+        caps=['idle','inspect','bow']
+        if {'left_upper_arm','left_forearm','left_hand'}<=self.names:caps.append('cast')
         if {'right_upper_arm','right_forearm','right_hand'}<=self.names:caps.append('wave')
         if 'wave' in caps and {'hand_right','holster_right'}<=self.data['sockets'].keys():
             bones={b['name']:b for b in self.data['bones']}
@@ -100,15 +101,10 @@ class Model:
             if chain and bones['right_upper_arm']['angle']==0 and self.data['sockets']['hand_right']['position'][0]==0:caps.append('draw')
         return caps
 
-    def pose(self,t,motion='idle'):
+    def pose(self,t,motion='idle',clock=None):
+        from .rig_motion import angles as shared_angles
         if motion not in self.capabilities:motion='idle'
-        angles={'chest':math.sin(t*1.7)*1.1,'head':math.sin(t*.8)*2}
-        if motion=='wave':
-            blend=max(0,min(1,t/.6,(3.2-t)/.6))
-            angles.update(right_upper_arm=-135*blend,right_forearm=(35+math.sin(t*9)*18)*blend,right_hand=math.sin(t*9)*13*blend)
-            for i,name in enumerate(('thumb','index','middle','ring')):
-                angles['right_'+name]=math.sin(t*8+i*.4)*5*blend
-        elif motion=='inspect':angles['head']=math.sin(min(1,t/3)*math.pi)*17
+        angles=shared_angles(self.names,t,motion,t if clock is None else clock)
         def evaluate():
             world={}
             for bone in self.data['bones']:
@@ -153,10 +149,11 @@ class Model:
         x,y,a=pose[slot['bone']];dx,dy=slot['position'];r=math.radians(a)
         return x+dx*math.cos(r)-dy*math.sin(r),y+dx*math.sin(r)+dy*math.cos(r),a
 
-    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1):
+    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1,clock=None):
         from PIL import ImageDraw
-        if still:t=0;motion='idle'
-        pose=self.pose(t,motion)
+        if still:t=0;motion='idle';clock=0
+        clock=t if clock is None else clock
+        pose=self.pose(t,motion,clock)
         result=Image.new('RGBA',tuple(self.data['size']))
         for layer in sorted(self.data['layers'],key=lambda l:l['z']):
             source=self.images[layer['asset']]
@@ -188,7 +185,12 @@ class Model:
             socket_name,ox,oy=anchors[item['slot']]
             point=self.socket(socket_name,pose)
             if point:
-                paint(draw,[item],point[0]-ox*scale,point[1]-oy*scale,scale,t,0,cast if not still else -1)
+                # Paint each prop around its socket, then inherit the joint rotation.
+                side=max(32,math.ceil(384*scale));center=side/2
+                tile=Image.new('RGBA',(side,side))
+                paint(ImageDraw.Draw(tile),[item],center-ox*scale,center-oy*scale,scale,clock,0,cast if not still else -1)
+                if item['slot']!='spell':tile=tile.rotate(-point[2],resample=Image.Resampling.BICUBIC)
+                result.alpha_composite(tile,(round(point[0]-center),round(point[1]-center)))
         return result
 
 
@@ -199,7 +201,7 @@ def draw(canvas):
     elapsed=canvas.motion.time-getattr(canvas,'model_motion_started',-100)
     motion=getattr(canvas,'model_motion','idle') if elapsed<3.2 else 'idle'
     frame=model.render(canvas.motion.time if motion=='idle' else elapsed,motion,canvas.motion.mouth,
-        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100))
+        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100),clock=canvas.motion.time)
     w,h=canvas.winfo_width(),canvas.winfo_height()
     scale=min((w-20)/frame.width,(h-20)/frame.height)
     frame=frame.resize((max(1,round(frame.width*scale)),max(1,round(frame.height*scale))),Image.Resampling.LANCZOS)
