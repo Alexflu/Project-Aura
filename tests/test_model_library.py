@@ -22,10 +22,18 @@ class ModelLibraryTests(unittest.TestCase):
         restored = ModelLibrary(self.profile)
         self.assertEqual(restored.selected, key)
         self.assertEqual(restored.restore().data, model.data)
-        self.assertEqual(len(restored.entries()), 3)
+        self.assertEqual(len(restored.entries()), 4)
         restored.choose(None)
         self.assertIsNone(ModelLibrary(self.profile).restore())
         self.assertTrue(self.library.path_for(key).exists())
+
+    def test_illustrated_pack_is_valid_and_selection_survives_restart(self):
+        model=self.library.choose('@illustrated')
+        self.assertEqual(model.data['id'],'aura.illustrated.v1')
+        self.assertIn('draw',model.capabilities)
+        self.assertIn('cast',model.capabilities)
+        self.assertEqual(ModelLibrary(self.profile).restore().data,model.data)
+        self.assertIsNotNone(model.render(1,'wave').getbbox())
 
     def test_reference_selection_persists(self):
         self.library.choose('@reference')

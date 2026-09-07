@@ -186,6 +186,8 @@ class App:
         self.tabs.select(self.look_page)
 
     def demo_speaking(self):
+        if self.model and 'mouth' not in self.model.data['sockets']:
+            raise AuraError("This model has no mouth animation yet. Choose Default Aura in Models to preview speech.")
         self.app_meter = None
         self.speech.stop()
         self.avatar.audio_level = None
@@ -504,6 +506,7 @@ class App:
         row=tk.Frame(p,bg=PANEL);row.pack(fill="x")
         self.button(row,"Use selected model",self.choose_library_model).pack(side="left",padx=(0,8))
         self.button(row,"Import model.json…",self.import_model).pack(side="left")
+        self.button(p,"Try illustrated Aura rig",lambda:self.set_model(self.model_library.choose("@illustrated"))).pack(anchor="w",pady=5)
         self.button(p,"Open reference rig",self.use_reference_model).pack(anchor="w",pady=5)
         self.button(p,"Restore default Aura",self.clear_model).pack(anchor="w",pady=5)
         row=tk.Frame(p,bg=PANEL);row.pack(fill="x",pady=12)
@@ -525,6 +528,9 @@ class App:
         model=self.model
         self.model_info.configure(text=(model.data["name"]+" · "+model.data["author"]+" · "+model.data["license"]+
             "\nMotions: "+", ".join(model.capabilities)) if model else "Default illustrated / classic body")
+
+        if model and model.data["id"]=="aura.illustrated.v1":
+            self.model_info.configure(text=self.model_info.cget("text")+"\nBody-rig preview: facial and lip animation are unfinished.")
 
     def set_model(self,model):
         self.model=model

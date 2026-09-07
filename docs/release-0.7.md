@@ -1,4 +1,26 @@
-# 0.7.0-beta.6 — shared gestures and secondary rig movement
+# 0.7.0-beta.7 — illustrated Aura body-rig preview
+
+**Models → Try illustrated Aura rig** loads a new layered Stealth Striker body
+based on the approved original art direction. The body uses the same Aura Rig 1
+joints and gestures as creator packs: shoulders, elbows, wrists, hips, knees and
+ankles are separate; back hair has its own joint. The wave now keeps a bent elbow,
+and rig heads respond to the existing pointer-gaze signal. The selected model is
+saved across restarts. The casting pose bends the elbow to keep the spell in view.
+Layered PNG edges now preserve their original opacity during compositing.
+The release includes an actual-renderer animated GIF of this new body.
+
+This is an optional body-articulation preview. Its face is currently static:
+blink, phoneme/mouth animation, individual finger articulation and clothing
+physics are unfinished. The existing illustrated sprite remains the default and
+retains its voice-driven face. Choose Default Aura to return to it.
+
+The generated part sheet and deterministic importer are included for contributors.
+The importer removes the sheet's neutral checkerboard background and assembles
+separate PNGs without changing the original sheet. Joint seams and proportions
+still need art refinement. No claim of production-quality full-body animation is
+made. See [illustrated rig notes](illustrated-rig.md).
+
+## Shared gestures and secondary rig movement
 
 Compatible Aura Rig 1 models gain bow and casting gestures, smooth gesture
 blending against a continuous idle clock, and optional hair/cloth/gear movement
@@ -49,7 +71,7 @@ Local Windows speech and selected WAV playback remain available. The optional 0.
 
 ## Verification and limits
 
-72 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
+76 unit/protocol tests pass, including permission boundaries, invalid model inputs, contact positions, reduced motion, tray settings and single-instance recovery. The live tray/rig check covers hide/restore/relaunch recovery and rendering. Dependency resolution audit reported no known vulnerabilities on 2026-09-06; this is not a security certification. Clean-machine, display-scale and multi-monitor testing remain open. The Windows portable build is unsigned.
 
 ## Local data
 

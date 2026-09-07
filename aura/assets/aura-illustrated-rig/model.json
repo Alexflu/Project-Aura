@@ -1,0 +1,340 @@
+{
+  "schema": "aura-rig-1",
+  "id": "aura.illustrated.v1",
+  "name": "Aura \u00b7 illustrated Stealth Striker",
+  "author": "Project Aura \u00b7 generated art",
+  "license": "MIT",
+  "size": [
+    600,
+    800
+  ],
+  "bones": [
+    {
+      "name": "root",
+      "parent": null,
+      "position": [
+        300,
+        350
+      ],
+      "angle": 0
+    },
+    {
+      "name": "chest",
+      "parent": "root",
+      "position": [
+        0,
+        -170
+      ],
+      "angle": 0
+    },
+    {
+      "name": "head",
+      "parent": "chest",
+      "position": [
+        0,
+        0
+      ],
+      "angle": 0
+    },
+    {
+      "name": "hair_back",
+      "parent": "head",
+      "position": [
+        0,
+        -105
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_upper_arm",
+      "parent": "chest",
+      "position": [
+        -52,
+        47
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_forearm",
+      "parent": "left_upper_arm",
+      "position": [
+        0,
+        102
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_hand",
+      "parent": "left_forearm",
+      "position": [
+        0,
+        94
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_thigh",
+      "parent": "root",
+      "position": [
+        -36,
+        62
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_shin",
+      "parent": "left_thigh",
+      "position": [
+        0,
+        139
+      ],
+      "angle": 0
+    },
+    {
+      "name": "left_foot",
+      "parent": "left_shin",
+      "position": [
+        0,
+        117
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_upper_arm",
+      "parent": "chest",
+      "position": [
+        52,
+        47
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_forearm",
+      "parent": "right_upper_arm",
+      "position": [
+        0,
+        102
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_hand",
+      "parent": "right_forearm",
+      "position": [
+        0,
+        94
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_thigh",
+      "parent": "root",
+      "position": [
+        36,
+        62
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_shin",
+      "parent": "right_thigh",
+      "position": [
+        0,
+        139
+      ],
+      "angle": 0
+    },
+    {
+      "name": "right_foot",
+      "parent": "right_shin",
+      "position": [
+        0,
+        117
+      ],
+      "angle": 0
+    }
+  ],
+  "layers": [
+    {
+      "bone": "head",
+      "asset": "head.png",
+      "pivot": [
+        80.5,
+        141.0
+      ],
+      "z": 6
+    },
+    {
+      "bone": "chest",
+      "asset": "torso.png",
+      "pivot": [
+        60.5,
+        7.6000000000000005
+      ],
+      "z": 3
+    },
+    {
+      "bone": "root",
+      "asset": "pelvis.png",
+      "pivot": [
+        57.0,
+        5.0
+      ],
+      "z": 4
+    },
+    {
+      "bone": "hair_back",
+      "asset": "hair-back.png",
+      "pivot": [
+        71.5,
+        14.200000000000001
+      ],
+      "z": -2
+    },
+    {
+      "bone": "left_upper_arm",
+      "asset": "left-upper.png",
+      "pivot": [
+        18.5,
+        9.44
+      ],
+      "z": 4
+    },
+    {
+      "bone": "left_forearm",
+      "asset": "left-forearm.png",
+      "pivot": [
+        17.0,
+        4.4
+      ],
+      "z": 2
+    },
+    {
+      "bone": "left_hand",
+      "asset": "left-hand.png",
+      "pivot": [
+        15.5,
+        6.4
+      ],
+      "z": 7
+    },
+    {
+      "bone": "left_thigh",
+      "asset": "left-thigh.png",
+      "pivot": [
+        43.0,
+        9.299999999999999
+      ],
+      "z": 1
+    },
+    {
+      "bone": "left_shin",
+      "asset": "left-shin.png",
+      "pivot": [
+        15.5,
+        6.800000000000001
+      ],
+      "z": 0
+    },
+    {
+      "bone": "left_foot",
+      "asset": "left-boot.png",
+      "pivot": [
+        33.5,
+        10.0
+      ],
+      "z": 2
+    },
+    {
+      "bone": "right_upper_arm",
+      "asset": "right-upper.png",
+      "pivot": [
+        17.5,
+        9.44
+      ],
+      "z": 4
+    },
+    {
+      "bone": "right_forearm",
+      "asset": "right-forearm.png",
+      "pivot": [
+        16.5,
+        4.4
+      ],
+      "z": 2
+    },
+    {
+      "bone": "right_hand",
+      "asset": "right-hand.png",
+      "pivot": [
+        15.5,
+        6.4
+      ],
+      "z": 7
+    },
+    {
+      "bone": "right_thigh",
+      "asset": "right-thigh.png",
+      "pivot": [
+        42.0,
+        9.299999999999999
+      ],
+      "z": 1
+    },
+    {
+      "bone": "right_shin",
+      "asset": "right-shin.png",
+      "pivot": [
+        16.0,
+        6.800000000000001
+      ],
+      "z": 0
+    },
+    {
+      "bone": "right_foot",
+      "asset": "right-boot.png",
+      "pivot": [
+        33.5,
+        10.0
+      ],
+      "z": 2
+    }
+  ],
+  "sockets": {
+    "hand_right": {
+      "bone": "right_hand",
+      "position": [
+        0,
+        18
+      ]
+    },
+    "holster_right": {
+      "bone": "root",
+      "position": [
+        65,
+        50
+      ]
+    },
+    "spell_origin": {
+      "bone": "left_hand",
+      "position": [
+        0,
+        18
+      ]
+    },
+    "back": {
+      "bone": "root",
+      "position": [
+        75,
+        30
+      ]
+    },
+    "charm": {
+      "bone": "chest",
+      "position": [
+        -80,
+        110
+      ]
+    }
+  }
+}

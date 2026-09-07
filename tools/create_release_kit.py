@@ -21,7 +21,8 @@ def main():
     with zipfile.ZipFile(source,'w',zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(files):archive.write(path,Path('ProjectAura-source')/path.relative_to(ROOT))
     release=[OUT/f'ProjectAura-{__version__}-windows-x64.zip',source,OUT/'ProjectAura-0.6-demo.mp4',
-             OUT/'ProjectAura-0.6-demo.srt',OUT/'ProjectAura-0.6-demo.png']
+             OUT/'ProjectAura-0.6-demo.srt',OUT/'ProjectAura-0.6-demo.png',
+             OUT/'aura-illustrated-motion.gif',OUT/'aura-illustrated-motion.png']
     checks={p.name:dict(bytes=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in release}
     (OUT/'release-manifest.json').write_text(json.dumps(dict(version=__version__,published=False,assets=checks),indent=2),encoding='utf-8')
     notes=OUT/'RELEASE-NOTES.md'

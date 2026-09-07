@@ -101,10 +101,11 @@ class Model:
             if chain and bones['right_upper_arm']['angle']==0 and self.data['sockets']['hand_right']['position'][0]==0:caps.append('draw')
         return caps
 
-    def pose(self,t,motion='idle',clock=None):
+    def pose(self,t,motion='idle',clock=None,gaze=0):
         from .rig_motion import angles as shared_angles
         if motion not in self.capabilities:motion='idle'
         angles=shared_angles(self.names,t,motion,t if clock is None else clock)
+        angles['head']+=max(-1,min(1,gaze))*6
         def evaluate():
             world={}
             for bone in self.data['bones']:
@@ -149,11 +150,11 @@ class Model:
         x,y,a=pose[slot['bone']];dx,dy=slot['position'];r=math.radians(a)
         return x+dx*math.cos(r)-dy*math.sin(r),y+dx*math.sin(r)+dy*math.cos(r),a
 
-    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1,clock=None):
+    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1,clock=None,gaze=0):
         from PIL import ImageDraw
         if still:t=0;motion='idle';clock=0
         clock=t if clock is None else clock
-        pose=self.pose(t,motion,clock)
+        pose=self.pose(t,motion,clock,0 if still else gaze)
         result=Image.new('RGBA',tuple(self.data['size']))
         for layer in sorted(self.data['layers'],key=lambda l:l['z']):
             source=self.images[layer['asset']]
@@ -163,7 +164,7 @@ class Model:
             left=math.floor(min(v[0] for v in corners));top=math.floor(min(v[1] for v in corners))
             w=math.ceil(max(v[0] for v in corners))-left;h=math.ceil(max(v[1] for v in corners))-top
             tile=source.transform((w,h),Image.Transform.AFFINE,(c,s,c*(left-x)+s*(top-y)+px,-s,c,-s*(left-x)+c*(top-y)+py),Image.Resampling.BICUBIC)
-            result.paste(tile,(left,top),tile)
+            result.alpha_composite(tile,(left,top))
         draw=ImageDraw.Draw(result)
         # The optional mouth socket supplies a simple amplitude-driven aperture.
         point=self.socket('mouth',pose)
@@ -201,7 +202,7 @@ def draw(canvas):
     elapsed=canvas.motion.time-getattr(canvas,'model_motion_started',-100)
     motion=getattr(canvas,'model_motion','idle') if elapsed<3.2 else 'idle'
     frame=model.render(canvas.motion.time if motion=='idle' else elapsed,motion,canvas.motion.mouth,
-        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100),clock=canvas.motion.time)
+        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100),clock=canvas.motion.time,gaze=canvas.motion.gaze)
     w,h=canvas.winfo_width(),canvas.winfo_height()
     scale=min((w-20)/frame.width,(h-20)/frame.height)
     frame=frame.resize((max(1,round(frame.width*scale)),max(1,round(frame.height*scale))),Image.Resampling.LANCZOS)
