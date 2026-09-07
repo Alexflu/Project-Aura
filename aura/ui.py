@@ -286,6 +286,14 @@ class App:
         box.grid(row=1, column=1, pady=3)
         box.bind("<<ComboboxSelected>>", lambda e: self.apply_presence())
         self.paragraph(p, "Mood and rendering are session choices.")
+        from .music import MODES, Reaction
+        self.music_energy=Reaction()
+        self.music_mode=tk.StringVar(value='Off')
+        self.label(p,'Music reaction',size=11).pack(anchor='w')
+        music_box=self.combo(p,self.music_mode,tuple(MODES))
+        music_box.pack(anchor='w',pady=4)
+        music_box.bind('<<ComboboxSelected>>',lambda e:self.update_music_choice())
+        self.paragraph(p,'Session only. Choose a layered model in Models, then Follow an audio source below. Loudness changes intensity; rhythm is stylized, not beat or genre detection. Music mode does not drive the mouth.')
         self.speech_text = tk.Text(p, height=3, bg="#273145", fg=TEXT, insertbackground=TEXT,
                                    relief="flat", wrap="word", font=("Segoe UI", 11))
         self.speech_text.pack(fill="x", pady=(0, 8))
@@ -438,6 +446,7 @@ class App:
         self.speech.stop()
         for avatar in self.avatars():
             avatar.expression, avatar.audio_level = "idle", None
+            avatar.music_reaction=None
         self.status.set("Speech stopped.")
 
     def voice_poll(self):
@@ -445,8 +454,13 @@ class App:
             self.speech.delay_ms = self.delay.get()
             level = self.app_meter.level() if self.app_meter else self.speech.poll()
             active = self.app_meter is not None or self.speech.state != "idle"
+            from .music import MODES
+            mode=MODES[self.music_mode.get()]
+            reacting=mode!='off' and self.app_meter is not None and self.model is not None and not self.avatar.paused and not self.avatar.reduced
+            energy=self.music_energy.update(level,.025,reacting)
             for avatar in self.avatars():
-                avatar.audio_level = level if active else None
+                avatar.audio_level = 0 if reacting else (level if active else None)
+                avatar.music_reaction=(mode,energy) if reacting else None
             self.level["value"] = level
             self.voice_state.configure(text=("Following " + self.app_meter.name) if self.app_meter else {"idle": "Silent", "preparing": "Preparing…", "playing": "Speaking / playing"}[self.speech.state])
         except (AuraError, OSError, RuntimeError) as exc:
@@ -454,6 +468,11 @@ class App:
             self.voice_state.configure(text="Audio unavailable")
             self.status.set(str(exc))
         self.voice_job = self.root.after(25, self.voice_poll)
+
+    def update_music_choice(self):
+        self.music_energy.energy=0
+        for avatar in self.avatars():avatar.music_reaction=None
+        self.status.set('Music reaction selected. Follow your music app or output device; use a layered model in Models. Genre is a style choice, not automatically detected.')
 
     def dock_avatar(self, side):
         if not self.floating or not self.floating.winfo_exists():

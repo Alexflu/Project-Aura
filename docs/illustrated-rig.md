@@ -39,6 +39,6 @@ the documented importer corrections; it is not an automatically production-ready
 
 ## Reproduce the runtime preview
 
-Run `python tools/export_rig_preview.py aura/assets/aura-illustrated-rig/model.json artifacts/aura-illustrated-motion.gif` before `python tools/create_release_kit.py`.
+Run `python tools/export_rig_preview.py aura/assets/aura-illustrated-rig/model.json artifacts/aura-illustrated-motion.gif` and `python tools/export_music_preview.py` before `python tools/create_release_kit.py`.
 The GIF and poster use the program renderer with the equipped built-in items.
 They are distinct from the existing narrated entrance tutorial.

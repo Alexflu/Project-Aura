@@ -101,11 +101,15 @@ class Model:
             if chain and bones['right_upper_arm']['angle']==0 and self.data['sockets']['hand_right']['position'][0]==0:caps.append('draw')
         return caps
 
-    def pose(self,t,motion='idle',clock=None,gaze=0):
+    def pose(self,t,motion='idle',clock=None,gaze=0,music=None):
         from .rig_motion import angles as shared_angles
         if motion not in self.capabilities:motion='idle'
         angles=shared_angles(self.names,t,motion,t if clock is None else clock)
         angles['head']+=max(-1,min(1,gaze))*6
+        if music and motion=='idle':
+            from .music import angles as music_angles
+            for name,value in music_angles(*music,t if clock is None else clock).items():
+                if name in self.names:angles[name]=angles.get(name,0)+value
         def evaluate():
             world={}
             for bone in self.data['bones']:
@@ -150,11 +154,12 @@ class Model:
         x,y,a=pose[slot['bone']];dx,dy=slot['position'];r=math.radians(a)
         return x+dx*math.cos(r)-dy*math.sin(r),y+dx*math.sin(r)+dy*math.cos(r),a
 
-    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1,clock=None,gaze=0):
+    def render(self,t,motion='idle',mouth=0,still=False,equipment=(),cast=-1,clock=None,gaze=0,music=None):
         from PIL import ImageDraw
         if still:t=0;motion='idle';clock=0
         clock=t if clock is None else clock
-        pose=self.pose(t,motion,clock,0 if still else gaze)
+        if still or motion!='idle':music=None
+        pose=self.pose(t,motion,clock,0 if still else gaze,music)
         result=Image.new('RGBA',tuple(self.data['size']))
         for layer in sorted(self.data['layers'],key=lambda l:l['z']):
             source=self.images[layer['asset']]
@@ -192,6 +197,9 @@ class Model:
                 paint(ImageDraw.Draw(tile),[item],center-ox*scale,center-oy*scale,scale,clock,0,cast if not still else -1)
                 if item['slot']!='spell':tile=tile.rotate(-point[2],resample=Image.Resampling.BICUBIC)
                 result.alpha_composite(tile,(round(point[0]-center),round(point[1]-center)))
+        if music:
+            from .music import props
+            props(result,self,pose,*music,clock)
         return result
 
 
@@ -202,7 +210,7 @@ def draw(canvas):
     elapsed=canvas.motion.time-getattr(canvas,'model_motion_started',-100)
     motion=getattr(canvas,'model_motion','idle') if elapsed<3.2 else 'idle'
     frame=model.render(canvas.motion.time if motion=='idle' else elapsed,motion,canvas.motion.mouth,
-        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100),clock=canvas.motion.time,gaze=canvas.motion.gaze)
+        canvas.paused or canvas.reduced,getattr(canvas,'equipment',()),canvas.motion.time-getattr(canvas,'cast_started',-100),clock=canvas.motion.time,gaze=canvas.motion.gaze,music=getattr(canvas,'music_reaction',None))
     w,h=canvas.winfo_width(),canvas.winfo_height()
     scale=min((w-20)/frame.width,(h-20)/frame.height)
     frame=frame.resize((max(1,round(frame.width*scale)),max(1,round(frame.height*scale))),Image.Resampling.LANCZOS)
