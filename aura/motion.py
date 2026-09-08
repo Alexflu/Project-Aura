@@ -3,8 +3,33 @@ import math
 from dataclasses import dataclass
 
 
+_BLINK_CYCLE = 24.0
+# Irregular authored timing keeps idle blinks from reading as a metronome while
+# staying deterministic for previews, recordings and tests. The close pair is
+# an occasional double-blink with a visible open beat between closures.
+_BLINK_EVENTS = (
+    (2.9, .11),
+    (7.2, .10),
+    (7.48, .09),
+    (12.6, .11),
+    (17.1, .10),
+    (22.0, .12),
+)
+
+
 def ease(current, target, dt, speed):
     return target + (current - target) * math.exp(-speed * dt)
+
+
+def _blink_amount(time):
+    """Return a deterministic 0..1 eyelid closure for organic idle timing."""
+    phase = time % _BLINK_CYCLE
+    amount = 0.0
+    for center, half_width in _BLINK_EVENTS:
+        distance = abs(phase - center)
+        distance = min(distance, _BLINK_CYCLE - distance)
+        amount = max(amount, max(0.0, 1 - distance / half_width))
+    return amount
 
 
 @dataclass
@@ -26,10 +51,7 @@ class Motion:
             target = 0 if level < .06 else min(1, math.sqrt(level))
         self.mouth = ease(self.mouth, target, dt, 24 if target > self.mouth else 18)
         self.gaze = ease(self.gaze, max(-1, min(1, gaze)), dt, 5)
-        # A brief close/open with a second blink in the longer cycle.
-        phase = self.time % 9.7
-        distance = min(abs(phase - 3.1), abs(phase - 8.0))
-        self.blink = max(0, 1 - distance / .11)
+        self.blink = _blink_amount(self.time)
         if mood == "sleepy":
             self.blink = max(.65, self.blink)
 
