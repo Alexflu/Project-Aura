@@ -30,6 +30,32 @@ class MotionTests(unittest.TestCase):
         self.assertEqual(motion.time, 3)
         self.assertEqual((motion.mouth, motion.gaze, motion.blink), (0, 0, 0))
 
+    def test_idle_blinks_have_varied_spacing_and_a_double_blink(self):
+        first = Motion(time=2.89)
+        first.update(.01, level=0)
+        self.assertGreater(first.blink, .9)
+
+        second = Motion(time=7.19)
+        second.update(.01, level=0)
+        self.assertGreater(second.blink, .9)
+
+        between = Motion(time=7.33)
+        between.update(.01, level=0)
+        self.assertEqual(between.blink, 0)
+
+        double = Motion(time=7.47)
+        double.update(.01, level=0)
+        self.assertGreater(double.blink, .9)
+
+        later = Motion(time=12.59)
+        later.update(.01, level=0)
+        self.assertGreater(later.blink, .9)
+
+    def test_sleepy_mood_keeps_heavy_lids_between_blinks(self):
+        motion = Motion(time=4)
+        motion.update(.01, level=0, mood="sleepy")
+        self.assertGreaterEqual(motion.blink, .65)
+
     def test_deformation_keeps_boots_planted(self):
         motion = Motion(time=2.3, gaze=1)
         self.assertEqual(motion.offset(500), (0, 0))
