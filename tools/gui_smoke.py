@@ -16,8 +16,9 @@ with tempfile.TemporaryDirectory() as temp:
     root = tk.Tk()
     app = App(root, Store(Path(temp) / "aura.db"))
     root.update_idletasks()
+    saved_look = app.store.read()["look"].copy()
     app.preview_request()
-    assert app.store.read()["look"]["hair"] == "long"
+    assert app.store.read()["look"] == saved_look
     app.apply_preview()
     assert app.store.read()["look"]["hair"] == "bob"
     app.undo()

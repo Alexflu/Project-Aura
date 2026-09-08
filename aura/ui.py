@@ -992,7 +992,7 @@ class App:
             bg="#293348", fg=TEXT, activebackground=ACCENT, relief="flat", cursor="hand2",
             font=("Segoe UI", 9, "bold"), takefocus=True)
         self.float_handle.place(relx=1, x=-8, y=8, anchor="ne")
-        self.status.set("Click Controls beside Aura, or use Aura controls in Studio. Ctrl+Space works while Aura has focus; Shift-hover is optional.")
+        self.status.set("Open Controls or press focused Ctrl+Space. Use arrow keys to select, Enter/Space to activate, Escape to close. Shift-hover is optional.")
 
     def resize_float(self, factor):
         if self.floating and self.floating.winfo_exists():
