@@ -1,3 +1,18 @@
+# 0.7.0-beta.9 — music transition refinement
+
+Music styles now ease through neutral instead of switching joint angles instantly.
+Explicit gestures blend music down and back up at their boundaries. Temporary
+props fade with the pose; the reading props appear after the arms settle and fade
+before they leave. The book follows the line between the hands instead of staying
+horizontal as the wrists tilt.
+
+Stop, Pause and unavailable audio still clear music immediately. Existing model
+packs work without a schema change. This improves transitions, not the underlying
+art: soft elbows, authored grips, face animation and full choreography remain open.
+
+82 unit/protocol tests pass. Live Tk checks cover reading-to-dance changes, floating
+synchronization and Stop. The animated music preview now includes style transitions.
+
 # 0.7.0-beta.8 — optional music reactions
 
 Choose a layered model in Models, then select a Music reaction in Presence and

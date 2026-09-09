@@ -106,10 +106,13 @@ class Model:
         if motion not in self.capabilities:motion='idle'
         angles=shared_angles(self.names,t,motion,t if clock is None else clock)
         angles['head']+=max(-1,min(1,gaze))*6
-        if music and motion=='idle':
-            from .music import angles as music_angles
-            for name,value in music_angles(*music,t if clock is None else clock).items():
-                if name in self.names:angles[name]=angles.get(name,0)+value
+        if music:
+            from .music import angles as music_angles, unpack
+            from .rig_motion import envelope
+            mode,energy,weight=unpack(music)
+            weight*=1-envelope(t) if motion!='idle' else 1
+            for name,value in music_angles(mode,energy,t if clock is None else clock).items():
+                if name in self.names:angles[name]=angles.get(name,0)+value*weight
         def evaluate():
             world={}
             for bone in self.data['bones']:
@@ -158,7 +161,7 @@ class Model:
         from PIL import ImageDraw
         if still:t=0;motion='idle';clock=0
         clock=t if clock is None else clock
-        if still or motion!='idle':music=None
+        if still:music=None
         pose=self.pose(t,motion,clock,0 if still else gaze,music)
         result=Image.new('RGBA',tuple(self.data['size']))
         for layer in sorted(self.data['layers'],key=lambda l:l['z']):
@@ -198,8 +201,18 @@ class Model:
                 if item['slot']!='spell':tile=tile.rotate(-point[2],resample=Image.Resampling.BICUBIC)
                 result.alpha_composite(tile,(round(point[0]-center),round(point[1]-center)))
         if music:
-            from .music import props
-            props(result,self,pose,*music,clock)
+            from .music import props, unpack
+            from .rig_motion import envelope
+            mode,energy,weight=unpack(music)
+            weight*=1-envelope(t) if motion!='idle' else 1
+            if mode=='read':
+                weight=max(0,(weight-.7)/.3)
+                weight=weight*weight*(3-2*weight)
+            if weight>0:
+                overlay=Image.new('RGBA',result.size)
+                props(overlay,self,pose,mode,energy,clock)
+                if weight<1:overlay.putalpha(overlay.getchannel('A').point(lambda a:round(a*weight)))
+                result.alpha_composite(overlay)
         return result
 
 
