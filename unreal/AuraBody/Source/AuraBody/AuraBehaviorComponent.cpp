@@ -20,6 +20,10 @@ void UAuraBehaviorComponent::Disconnect(const FString& Reason)
     bConnected = false;
     Mode = TEXT("idle");
     Gesture = TEXT("none");
+    Expression = TEXT("neutral");
+    ExpressionIntensity = 0;
+    Posture = TEXT("neutral");
+    Blush = 0;
     MouthOpen = 0;
     bMoving = false;
     bPaused = true;
@@ -51,21 +55,28 @@ void UAuraBehaviorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
         return Object->TryGetNumberField(Key, Value) && FMath::IsFinite(Value)
             && Value >= Low && Value <= High;
     };
-    double Version, Sequence, X, Y, GX, GY, GZ, Mouth;
-    FString Session, NewMode, NewGesture;
+    double Version, Sequence, X, Y, GX, GY, GZ, Mouth, NewExpressionIntensity, NewBlush;
+    FString Session, NewMode, NewGesture, NewExpression, NewPosture;
     bool Paused, Moving;
-    if (Object->Values.Num() != 13 ||
+    if (Object->Values.Num() != 17 ||
         !Num(TEXT("version"), Version, 1, 1) ||
         !Num(TEXT("sequence"), Sequence, 1, 9007199254740991.0) ||
         Sequence != FMath::FloorToDouble(Sequence) ||
         !Num(TEXT("x"), X, -500, 500) || !Num(TEXT("y"), Y, -500, 500) ||
         !Num(TEXT("gaze_x"), GX, -500, 500) || !Num(TEXT("gaze_y"), GY, -500, 500) ||
         !Num(TEXT("gaze_z"), GZ, -500, 500) || !Num(TEXT("mouth_open"), Mouth, 0, 1) ||
+        !Num(TEXT("expression_intensity"), NewExpressionIntensity, 0, 1) ||
+        !Num(TEXT("blush"), NewBlush, 0, 1) ||
         !Object->TryGetStringField(TEXT("session"), Session) || Session.Len() != 36 ||
         !Object->TryGetStringField(TEXT("mode"), NewMode) ||
         !(NewMode == TEXT("idle") || NewMode == TEXT("listening") || NewMode == TEXT("speaking")) ||
         !Object->TryGetStringField(TEXT("gesture"), NewGesture) ||
         !(NewGesture == TEXT("none") || NewGesture == TEXT("wave") || NewGesture == TEXT("nod")) ||
+        !Object->TryGetStringField(TEXT("expression"), NewExpression) ||
+        !(NewExpression == TEXT("neutral") || NewExpression == TEXT("happy") ||
+          NewExpression == TEXT("curious") || NewExpression == TEXT("concerned")) ||
+        !Object->TryGetStringField(TEXT("posture"), NewPosture) ||
+        !(NewPosture == TEXT("neutral") || NewPosture == TEXT("attentive") || NewPosture == TEXT("relaxed")) ||
         !Object->TryGetBoolField(TEXT("paused"), Paused) ||
         !Object->TryGetBoolField(TEXT("moving"), Moving))
     { Fail(TEXT("Unsupported snapshot fields")); return; }
@@ -87,6 +98,10 @@ void UAuraBehaviorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
     bPaused = Paused;
     Mode = Paused ? TEXT("idle") : NewMode;
     Gesture = Paused ? TEXT("none") : NewGesture;
+    Expression = NewExpression;
+    ExpressionIntensity = NewExpressionIntensity;
+    Posture = NewPosture;
+    Blush = NewBlush;
     PositionCm = FVector(X, Y, 0);
     GazeTargetCm = FVector(GX, GY, GZ);
     MouthOpen = !Paused && NewMode == TEXT("speaking") ? Mouth : 0;
