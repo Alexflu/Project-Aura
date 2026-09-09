@@ -18,6 +18,10 @@ public:
 
     UPROPERTY(BlueprintReadOnly, Category="Aura") FString Mode = TEXT("idle");
     UPROPERTY(BlueprintReadOnly, Category="Aura") FString Gesture = TEXT("none");
+    UPROPERTY(BlueprintReadOnly, Category="Aura") FString Expression = TEXT("neutral");
+    UPROPERTY(BlueprintReadOnly, Category="Aura") float ExpressionIntensity = 0;
+    UPROPERTY(BlueprintReadOnly, Category="Aura") FString Posture = TEXT("neutral");
+    UPROPERTY(BlueprintReadOnly, Category="Aura") float Blush = 0;
     UPROPERTY(BlueprintReadOnly, Category="Aura") FVector PositionCm = FVector::ZeroVector;
     UPROPERTY(BlueprintReadOnly, Category="Aura") FVector GazeTargetCm = FVector(200, 0, 160);
     UPROPERTY(BlueprintReadOnly, Category="Aura") float MouthOpen = 0;
