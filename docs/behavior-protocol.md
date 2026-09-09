@@ -25,6 +25,9 @@ controller acceptance only, never proof that Unreal rendered a pose.
 | look_at | x, y, z | Persistent gaze target in stage-relative Unreal centimeters |
 | gesture | name, duration_s | wave or nod, lasting 0.05..10 seconds |
 | walk_to | x, y | Walk toward stage-relative XY at 100 cm/s, no overshoot |
+| expression | name, intensity | Persistent neutral/happy/curious/concerned face intent at 0..1 intensity |
+| posture | name | Persistent neutral/attentive/relaxed body intent |
+| blush | intensity | Persistent material-effect intent at 0..1 |
 | pause | {} | Cancel all transient behaviors and block new cues |
 | resume | {} | Unpause; cancelled/rejected cues are not replayed |
 
@@ -32,7 +35,15 @@ Coordinates must be finite numbers within -500..500 cm. Unreal axes: X forward,
 Y right, Z up. Movement remains on the stage plane; this is not navigation or
 computer/window control. Speech and gesture can overlap movement. New commands
 replace the same channel. Listening stops motion to attend to the user. Idle and
-pause preserve gaze/position; the renderer should freeze gaze while paused.
+pause preserve gaze/position and persistent expression/posture/blush state; the
+renderer should freeze animation while paused. Loss of the producer resets those
+expressive channels to neutral so stale appearance cannot become stuck on screen.
+
+The three expressive commands are deliberately semantic. `happy` does not specify
+blendshape weights, `attentive` does not specify spine rotations, and blush does
+not expose a material parameter name. Unreal/MetaHuman owns the mapping, blending,
+retargeting and asset-specific implementation. This keeps model intent portable
+across temporary mannequins, MetaHumans, and future rigs.
 
 ## Local snapshot transport
 
@@ -42,9 +53,11 @@ bring-up, not final audio streaming. Concurrent writers and network shares are n
 supported. Windows reader locks are retried for up to 50 ms; persistent write
 failure stops the producer and the receiver then times out.
 
-Exactly 13 fields: `version`, `session` (UUID), `sequence` (positive increasing
+Exactly 17 fields: `version`, `session` (UUID), `sequence` (positive increasing
 integer), `paused`, `mode` (idle/listening/speaking), `x`, `y`, `moving`, `gaze_x`,
-`gaze_y`, `gaze_z`, `gesture` (none/wave/nod), `mouth_open` (0..1).
+`gaze_y`, `gaze_z`, `gesture` (none/wave/nod), `expression`
+(neutral/happy/curious/concerned), `expression_intensity` (0..1), `posture`
+(neutral/attentive/relaxed), `blush` (0..1), and `mouth_open` (0..1).
 The full snapshot replaces state; intermediate snapshots may be skipped, so this
 transport cannot guarantee execution of very short gestures. No acknowledgment
 or delivery guarantee is implemented. Use durations comfortably above 1/30s.
