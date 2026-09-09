@@ -21,6 +21,9 @@ class EmbodimentTests(unittest.TestCase):
                    cue("speak", {"duration_s": True}), cue("walk_to", {"x": math.nan, "y": 0}),
                    cue("look_at", {"x": 0, "y": 0, "z": math.inf}),
                    cue("walk_to", {"x": 501, "y": 0}), cue("idle", {"extra": 1}),
+                   cue("expression", {"name": "rage", "intensity": .5}),
+                   cue("expression", {"name": "happy", "intensity": 1.1}),
+                   cue("posture", {"name": "backflip"}), cue("blush", {"intensity": -0.1}),
                    {**cue("idle"), "version": True}, {**cue("idle"), "version": 2},
                    {**cue("idle"), "action": []}, {**cue("idle"), "id": ""}]
         before = copy.deepcopy(controller.__dict__)
@@ -74,6 +77,22 @@ class EmbodimentTests(unittest.TestCase):
         snapshot = controller.snapshot()
         self.assertEqual((snapshot["mode"], snapshot["gesture"], snapshot["mouth_open"]), ("idle", "none", 0))
         self.assertEqual(controller.gaze, [100, -50, 160])
+
+    def test_expression_posture_and_blush_are_persistent_semantic_channels(self):
+        controller = BehaviorController()
+        controller.apply(cue("expression", {"name": "curious", "intensity": .7}, "expression"))
+        controller.apply(cue("posture", {"name": "attentive"}, "posture"))
+        controller.apply(cue("blush", {"intensity": .35}, "blush"))
+        first = controller.snapshot()
+        controller.apply(cue("gesture", {"name": "wave", "duration_s": .1}, "wave"))
+        controller.tick(.2)
+        second = controller.snapshot()
+        for snapshot in (first, second):
+            self.assertEqual(snapshot["expression"], "curious")
+            self.assertEqual(snapshot["expression_intensity"], .7)
+            self.assertEqual(snapshot["posture"], "attentive")
+            self.assertEqual(snapshot["blush"], .35)
+        self.assertEqual(second["gesture"], "none")
 
     def test_listen_interrupts_speech_and_motion(self):
         controller = BehaviorController()
