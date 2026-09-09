@@ -27,7 +27,9 @@ def validate_command(value):
     action, params = value["action"], value["params"]
     fields = {"idle": set(), "listen": set(), "speak": {"duration_s"},
               "look_at": {"x", "y", "z"}, "gesture": {"name", "duration_s"},
-              "walk_to": {"x", "y"}, "pause": set(), "resume": set()}
+              "walk_to": {"x", "y"}, "expression": {"name", "intensity"},
+              "posture": {"name"}, "blush": {"intensity"},
+              "pause": set(), "resume": set()}
     if not isinstance(action, str) or action not in fields or not isinstance(params, dict) or set(params) != fields[action]:
         raise ValueError("Unsupported action or parameters")
     params = dict(params)
@@ -36,8 +38,14 @@ def validate_command(value):
             params[key] = number(params[key], -500, 500)
     if "duration_s" in params:
         params["duration_s"] = number(params["duration_s"], .05, 10)
+    if "intensity" in params:
+        params["intensity"] = number(params["intensity"], 0, 1)
     if action == "gesture" and params["name"] not in ("wave", "nod"):
         raise ValueError("Unsupported gesture")
+    if action == "expression" and params["name"] not in ("neutral", "happy", "curious", "concerned"):
+        raise ValueError("Unsupported expression")
+    if action == "posture" and params["name"] not in ("neutral", "attentive", "relaxed"):
+        raise ValueError("Unsupported posture")
     return {**value, "params": params}
 
 
@@ -53,6 +61,10 @@ class BehaviorController:
         self.gaze = [200.0, 0.0, 160.0]
         self.gesture = "none"
         self.gesture_remaining = 0.0
+        self.expression = "neutral"
+        self.expression_intensity = 0.0
+        self.posture = "neutral"
+        self.blush = 0.0
         self.speech_remaining = 0.0
         self.speech_elapsed = 0.0
         self._seen = set()
@@ -93,6 +105,13 @@ class BehaviorController:
             self.gesture, self.gesture_remaining = p["name"], p["duration_s"]
         elif action == "walk_to":
             self.target = [p["x"], p["y"]]
+        elif action == "expression":
+            self.expression = p["name"]
+            self.expression_intensity = p["intensity"]
+        elif action == "posture":
+            self.posture = p["name"]
+        elif action == "blush":
+            self.blush = p["intensity"]
         return "accepted"
 
     def tick(self, dt):
@@ -120,6 +139,8 @@ class BehaviorController:
                 "moving": not self.paused and math.dist(self.position, self.target) > .01,
                 "gaze_x": self.gaze[0], "gaze_y": self.gaze[1], "gaze_z": self.gaze[2],
                 "gesture": self.gesture,
+                "expression": self.expression, "expression_intensity": self.expression_intensity,
+                "posture": self.posture, "blush": self.blush,
                 "mouth_open": (0.25 + .65 * abs(math.sin(self.speech_elapsed * 12)))
                 if self.mode == "speaking" and not self.paused else 0.0}
 
