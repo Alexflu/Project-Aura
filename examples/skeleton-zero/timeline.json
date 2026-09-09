@@ -22,6 +22,40 @@
     }
   },
   {
+    "at_s": 1.2,
+    "command": {
+      "version": 1,
+      "id": "demo-expression",
+      "action": "expression",
+      "params": {
+        "name": "curious",
+        "intensity": 0.7
+      }
+    }
+  },
+  {
+    "at_s": 1.4,
+    "command": {
+      "version": 1,
+      "id": "demo-posture",
+      "action": "posture",
+      "params": {
+        "name": "attentive"
+      }
+    }
+  },
+  {
+    "at_s": 1.6,
+    "command": {
+      "version": 1,
+      "id": "demo-blush",
+      "action": "blush",
+      "params": {
+        "intensity": 0.25
+      }
+    }
+  },
+  {
     "at_s": 2,
     "command": {
       "version": 1,
@@ -92,6 +126,40 @@
       "params": {
         "x": 0,
         "y": 0
+      }
+    }
+  },
+  {
+    "at_s": 14,
+    "command": {
+      "version": 1,
+      "id": "demo-happy",
+      "action": "expression",
+      "params": {
+        "name": "happy",
+        "intensity": 0.8
+      }
+    }
+  },
+  {
+    "at_s": 14.2,
+    "command": {
+      "version": 1,
+      "id": "demo-relaxed",
+      "action": "posture",
+      "params": {
+        "name": "relaxed"
+      }
+    }
+  },
+  {
+    "at_s": 14.4,
+    "command": {
+      "version": 1,
+      "id": "demo-blush-off",
+      "action": "blush",
+      "params": {
+        "intensity": 0
       }
     }
   },
