@@ -5,6 +5,31 @@ MODES={'Off':'off','Gentle nod':'gentle','Dance + speakers':'dance',
        'Headbang':'headbang','Headphones + book':'read'}
 
 
+class Transition:
+    """Return to neutral before changing styles; keep pose and props in sync."""
+    def __init__(self):
+        self.mode='off'
+        self.amount=0.0
+
+    def update(self,target,dt,energy):
+        dt=max(0,min(.2,dt))
+        if target!=self.mode:
+            self.amount=max(0,self.amount-dt/.35)
+            if self.amount==0:self.mode=target
+        elif target!='off':
+            self.amount=min(1,self.amount+dt/.65)
+        weight=self.amount*self.amount*(3-2*self.amount)
+        return (self.mode,energy,weight) if self.mode!='off' and weight>0 else None
+
+    def reset(self):
+        self.mode='off';self.amount=0.0
+
+
+def unpack(reaction):
+    mode,energy=reaction[:2]
+    return mode,energy,max(0,min(1,reaction[2] if len(reaction)>2 else 1))
+
+
 class Reaction:
     def __init__(self):
         self.energy=0.0
@@ -66,11 +91,14 @@ def props(image,model,pose,mode,energy,clock):
         for u in (.13,.87):
             draw.polygon([p(art.width*(u+dx),art.height*v) for dx,v in ((-.045,.40),(.045,.40),(.045,.60),(-.045,.60))],fill='#24283E',outline=color)
     if {'left_hand','right_hand'}<=pose.keys():
-        left,right=pose['left_hand'],pose['right_hand']
+        left,right=sorted((pose['left_hand'],pose['right_hand']),key=lambda p:p[0])
         x=(left[0]+right[0])/2;y=(left[1]+right[1])/2
-        w=max(25*scale,min(140*scale,abs(left[0]-right[0])/2+12*scale));h=48*scale
-        draw.polygon([(x-w,y-h),(x,y-h+8*scale),(x+w,y-h),(x+w,y+6*scale),(x,y+14*scale),(x-w,y+6*scale)],fill='#DBD5C5',outline=color)
-        draw.line([(x,y-h+8*scale),(x,y+14*scale)],fill='#665E78',width=max(1,round(scale)))
+        dx,dy=right[0]-left[0],right[1]-left[1]
+        angle=math.atan2(dy,dx);c,s=math.cos(angle),math.sin(angle)
+        w=math.hypot(dx,dy)/2+8*scale;h=48*scale
+        def book(u,v):return x+u*c-v*s,y+u*s+v*c
+        draw.polygon([book(-w,-h),book(0,-h+8*scale),book(w,-h),book(w,0),book(0,8*scale),book(-w,0)],fill='#DBD5C5',outline=color)
+        draw.line([book(0,-h+8*scale),book(0,8*scale)],fill='#665E78',width=max(1,round(scale)))
         for offset in range(4):
-            cy=y-h+(17+offset*7)*scale
-            for sign in (-1,1):draw.line([(x+sign*8*scale,cy),(x+sign*(w-8*scale),cy-4*scale)],fill='#8B8298',width=max(1,round(scale)))
+            cy=-h+(17+offset*7)*scale
+            for sign in (-1,1):draw.line([book(sign*8*scale,cy),book(sign*(w-8*scale),cy-4*scale)],fill='#8B8298',width=max(1,round(scale)))

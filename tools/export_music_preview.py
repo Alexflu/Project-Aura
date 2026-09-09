@@ -4,13 +4,15 @@ import sys
 from PIL import Image,ImageDraw
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from aura.models import load_pack
+from aura.music import Transition
 
 model,_=load_pack(Path(__file__).resolve().parents[1]/'aura/assets/aura-illustrated-rig/model.json')
-frames=[]
+frames=[];transition=Transition()
 for mode in ('gentle','dance','headbang','read'):
     for index in range(24):
         t=index/12
-        body=model.render(t,music=(mode,.8))
+        reaction=transition.update(mode,1/12,.8)
+        body=model.render(len(frames)/12,music=reaction)
         frame=Image.new('RGBA',(600,840),'#10151F')
         frame.alpha_composite(body)
         ImageDraw.Draw(frame).text((20,810),'Music reaction: '+mode+' (simulated level)',fill='#B6A0FF')
