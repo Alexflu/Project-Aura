@@ -1,5 +1,19 @@
 # Architecture
 
+## 3D development boundary
+
+The [Skeleton Zero harness](skeleton-zero.md) adds `aura/embodiment.py` (validated
+semantic state), `tools/skeleton_zero.py` (offline replay/lifecycle), and
+`unreal/AuraBody` (AuraShell C++ receiver scaffold). It runs separately from the
+shipped Tk desktop and its profile. See [protocol and future voice/perception
+interfaces](behavior-protocol.md). Unreal source has not yet been compiled here.
+
+Target path: optional Realtime and consented local perception -> AuraBridge ->
+AuraCore policy/behavior state -> Unreal body. Desktop actions continue through
+approved adapters. The renderer never gains computer permissions from a gesture.
+The current demo connects only the offline controller to a local snapshot file;
+Realtime, perception, product Pause integration and desktop embedding remain open.
+
 ## Implemented components
 
 | Layer | Implementation | Responsibility |

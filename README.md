@@ -12,6 +12,12 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 ## Windows beta 0.7.0-beta.9
 
+**New development direction: real-time 3D embodiment.** The first
+[Skeleton Zero harness](docs/skeleton-zero.md) adds an offline semantic controller
+and Unreal C++ project scaffold. It does not yet include a rigged character or a
+compiled Unreal demo. Follow the [3D roadmap](docs/roadmap.md) and
+[behavior protocol](docs/behavior-protocol.md). The downloadable beta below is 2D.
+
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
 Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`, `bridge`, `docs` and `examples` in place. Close older Aura versions before opening the new build. Existing preferences remain in your Windows profile. Starting with beta 4, opening the packaged app checks for a newer official release and switches to it after verification. No Windows startup task or background checker is installed. See [Updates](docs/updates.md) for offline use and disabling checks. The title bar shows the running version.

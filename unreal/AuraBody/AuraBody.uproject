@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.6",
+  "Category": "",
+  "Description": "Skeleton Zero development harness; local assets required.",
+  "Modules": [
+    {
+      "Name": "AuraBody",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

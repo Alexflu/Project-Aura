@@ -1,0 +1,107 @@
+[
+  {
+    "at_s": 0,
+    "command": {
+      "version": 1,
+      "id": "demo-0",
+      "action": "idle",
+      "params": {}
+    }
+  },
+  {
+    "at_s": 1,
+    "command": {
+      "version": 1,
+      "id": "demo-1",
+      "action": "look_at",
+      "params": {
+        "x": 180,
+        "y": 100,
+        "z": 160
+      }
+    }
+  },
+  {
+    "at_s": 2,
+    "command": {
+      "version": 1,
+      "id": "demo-2",
+      "action": "listen",
+      "params": {}
+    }
+  },
+  {
+    "at_s": 4,
+    "command": {
+      "version": 1,
+      "id": "demo-3",
+      "action": "speak",
+      "params": {
+        "duration_s": 3
+      }
+    }
+  },
+  {
+    "at_s": 4.5,
+    "command": {
+      "version": 1,
+      "id": "demo-4",
+      "action": "gesture",
+      "params": {
+        "name": "wave",
+        "duration_s": 2
+      }
+    }
+  },
+  {
+    "at_s": 8,
+    "command": {
+      "version": 1,
+      "id": "demo-5",
+      "action": "walk_to",
+      "params": {
+        "x": 200,
+        "y": 0
+      }
+    }
+  },
+  {
+    "at_s": 11,
+    "command": {
+      "version": 1,
+      "id": "demo-6",
+      "action": "pause",
+      "params": {}
+    }
+  },
+  {
+    "at_s": 12,
+    "command": {
+      "version": 1,
+      "id": "demo-7",
+      "action": "resume",
+      "params": {}
+    }
+  },
+  {
+    "at_s": 12.5,
+    "command": {
+      "version": 1,
+      "id": "demo-8",
+      "action": "walk_to",
+      "params": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  {
+    "at_s": 15,
+    "command": {
+      "version": 1,
+      "id": "demo-9",
+      "action": "idle",
+      "params": {}
+    }
+  }
+]
