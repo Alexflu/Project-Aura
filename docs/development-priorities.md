@@ -1,5 +1,10 @@
 # Remaining work, ordered by user impact
 
+**Current embodiment priority:** [Skeleton Zero](skeleton-zero.md), a real rigged
+Unreal body driven through a semantic protocol. The list below describes older 2D
+beta work; it no longer sets the order for the 3D effort. See the revised
+[roadmap](roadmap.md) before selecting new work.
+
 Beta 7 adds an optional illustrated body on the shared 2D rig, alongside persistent model imports, tray recovery, startup-only updates and app/device audio meters. The following remain unfinished.
 
 1. Layered body rig and expressive face: separate jaw, authored intermediate mouth shapes, eyes, brows, hands, forearms, hair clumps and clothing. Add a hand/holster socket contract, occlusion and contact poses. Acceptance: draw and stow a dagger without a floating prop, doubled lips or body seams.

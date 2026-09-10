@@ -15,3 +15,11 @@ artifacts/
 *.sqlite3-journal
 *.db
 *.zip
+
+# Unreal generated state/build products; authored assets require provenance review.
+unreal/**/Binaries/
+unreal/**/Intermediate/
+unreal/**/Saved/
+unreal/**/DerivedDataCache/
+unreal/**/.vs/
+unreal/**/*.sln
