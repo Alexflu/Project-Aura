@@ -9,8 +9,8 @@ work. Maintain the existing 2D beta, but prioritize proving a real rigged body.
 
 1. **Foundation / Skeleton Zero:** Unreal + a temporary rigged skeletal character,
    idle, gaze, listen, speech cue, gesture and movement in one real-time scene.
-   The [offline controller and Unreal scaffold](skeleton-zero.md) are the first
-   supporting slice; the compiled character demonstration is still open in
+   The [offline controller and native Unreal stage](skeleton-zero.md) demonstrate
+   a compiled skeletal mannequin. Facial performance and MetaHuman replacement remain in
    [issue #13](https://github.com/Alexflu/Project-Aura/issues/13).
 2. **Realtime conversation:** opt-in OpenAI Realtime, audible streaming playback,
    interruption, playback-clock mouth animation and session lifecycle.

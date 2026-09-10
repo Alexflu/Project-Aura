@@ -1,0 +1,94 @@
+"""Launch the real Unreal stage and check its receiver/rig telemetry end to end."""
+import argparse
+import json
+from pathlib import Path
+import statistics
+import subprocess
+import sys
+import time
+import uuid
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from aura.embodiment import BehaviorController, write_snapshot
+from tools.skeleton_zero import load_timeline, replay
+from tools.unreal_body import PROJECT, ROOT, launch_command, runtime_environment
+
+
+def read_samples(path):
+    if not path.exists():
+        return []
+    # Only complete lines: the renderer may still be appending its next sample.
+    text = path.read_text(encoding="utf-8")
+    return [json.loads(line) for line in text.splitlines(keepends=True) if line.endswith("\n")]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--engine-root", type=Path, required=True)
+    args = parser.parse_args()
+    folder = PROJECT.parent / "Saved/Aura/Smoke" / uuid.uuid4().hex[:10]
+    folder.mkdir(parents=True)
+    snapshot = folder / "behavior.json"
+    telemetry = folder / "runtime.jsonl"
+    controller = BehaviorController()
+    controller.apply({"version": 1, "id": "stale-speech", "action": "speak", "params": {"duration_s": 10}})
+    write_snapshot(snapshot, controller.snapshot())
+    command = launch_command(args.engine_root) + ["-Unattended", "-AuraTelemetry", f"-AuraDataDir={folder}"]
+    process = subprocess.Popen(command, env=runtime_environment())
+    try:
+        deadline = time.monotonic() + 180
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                raise RuntimeError(f"Unreal exited with {process.returncode}; inspect Saved/Logs")
+            samples = read_samples(telemetry)
+            if samples and samples[-1]["rig_ready"] and samples[-1]["elapsed_s"] >= 2:
+                break
+            time.sleep(.25)
+        else:
+            raise RuntimeError("No ready skeletal rig within 180 seconds; inspect Saved/Logs")
+        assert not any(s["connected"] or s["mouth"] for s in samples), "Static leftover snapshot animated"
+        print("PASS static leftover snapshot is ignored; real skeletal mesh loaded", flush=True)
+        replay(load_timeline(ROOT / "examples/skeleton-zero/timeline.json"), snapshot)
+        time.sleep(1.5)
+        samples = read_samples(telemetry)
+        assert all(s["rig_ready"] and s["bones"] > 20 for s in samples)
+        assert {s["mode"] for s in samples} >= {"idle", "listening", "speaking"}
+        assert any(s["wave_weight"] > .7 for s in samples), "No skeletal wave response"
+        assert max(s["right_hand_z"] for s in samples) - min(s["right_hand_z"] for s in samples) > 30, "Wrist bone did not move"
+        assert max(s["left_foot_z"] for s in samples) - min(s["left_foot_z"] for s in samples) > 3, "Foot bone did not move"
+        assert any(abs(s["head_yaw"]) > 15 for s in samples), "No gaze response"
+        assert max(s["x"] for s in samples) > 180, "No stage movement"
+        assert any(s["mouth"] > .1 for s in samples), "No synthetic speech cue"
+        assert not samples[-1]["connected"] and samples[-1]["mouth"] == 0, "Stale producer did not idle"
+        assert abs(samples[-1]["x"] - samples[-3]["x"]) < .01, "Stale producer did not hold position"
+        # Reconnect, then corrupt input during active motion/speech.
+        controller = BehaviorController()
+        controller.apply({"version": 1, "id": "move", "action": "walk_to", "params": {"x": 400, "y": 0}})
+        controller.apply({"version": 1, "id": "speak", "action": "speak", "params": {"duration_s": 10}})
+        for _ in range(30):
+            write_snapshot(snapshot, controller.snapshot())
+            controller.tick(1 / 30)
+            time.sleep(1 / 30)
+        assert read_samples(telemetry)[-1]["connected"], "Producer restart failed"
+        write_snapshot(snapshot, {"invalid": True})
+        time.sleep(1.5)
+        tail = read_samples(telemetry)[-3:]
+        assert all(not s["connected"] and s["mouth"] == 0 for s in tail)
+        assert max(s["x"] for s in tail) - min(s["x"] for s in tail) < .01
+        ms = [s["frame_ms"] for s in samples if s["elapsed_s"] > 3]
+        report = {"result": "passed", "samples": len(samples), "bones": samples[-1]["bones"],
+                  "sampled_mean_frame_ms": statistics.mean(ms), "sampled_worst_frame_ms": max(ms),
+                  "checks": ["skeletal_mesh", "static_leftover", "six_cue_channels", "producer_restart",
+                             "stale_disconnect", "malformed_input_stop"],
+                  "limits": "Sampled frame times; offline cues; mannequin has no facial rig or audio."}
+        (folder / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(json.dumps(report, indent=2))
+        print(f"Evidence: {folder}")
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            process.wait(timeout=15)
+
+
+if __name__ == "__main__":
+    main()

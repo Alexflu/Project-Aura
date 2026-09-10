@@ -1,8 +1,59 @@
 # Skeleton Zero: local Unreal bring-up
 
-Status: tested offline Python controller plus **uncompiled Unreal source scaffold**.
-There is no included character, map, animation Blueprint, audio playback or live AI.
+Status: offline Python controller plus a native Unreal mannequin stage. See the
+runtime validation section below for what has actually been checked. The mannequin
+is a temporary rigged 3D body; it is not Aura's final MetaHuman. There is no audio
+playback or live AI in this harness.
 Tracking: [issue #13](https://github.com/Alexflu/Project-Aura/issues/13).
+
+## Automated mannequin route
+
+Install Unreal 5.6.1 with **Templates and Feature Packs**, Engine Source and
+MetaHuman Creator Core Data. On the development host this is
+`D:\Programs\EpicGames\UE_5.6`. Visual Studio 2022 C++ tools and a compatible Windows
+SDK are required. From the repository root:
+
+```powershell
+python tools/unreal_body.py prepare --engine-root D:\Programs\EpicGames\UE_5.6
+python tools/unreal_body.py build --engine-root D:\Programs\EpicGames\UE_5.6
+python tools/unreal_body.py demo --engine-root D:\Programs\EpicGames\UE_5.6
+```
+
+After setup, double-click **Launch Skeleton Zero.cmd**. The helper discovers Unreal
+from Epic's installation manifest (or `AURA_UNREAL_ROOT`), waits for the rig to load,
+plays the sequence, and leaves the stage open until you close it. Each demo has an
+isolated input directory. For manual control use `run` instead of `demo`, then run
+`python tools/skeleton_zero.py` in a second terminal. The native game mode
+creates the stage, lights, camera and skeletal actor in the engine's Entry map.
+No hand-authored map or Animation Blueprint is needed for this temporary route.
+The helper keeps its derived-data cache beside the project on D:. It copies local
+Epic template assets without overwriting differing files and records their source
+and hashes in `Saved/Aura/asset-manifest.json`. Those assets are ignored by Git;
+they are not relicensed as MIT. Install them locally on each development machine.
+
+The mannequin uses an actual skinned skeletal mesh with procedural idle, gaze,
+walking and a wave/nod. These are prototype poses, not motion-captured performance,
+navigation, foot-contact IK or production animation blending. Listening changes
+the attentive pose and HUD. The synthetic speech signal is a HUD meter because
+this mannequin has no facial rig. Expression/blush are also diagnostic signals;
+MetaHuman face/material bindings remain open. Pause/disconnect hold position and
+freeze skeletal motion. There is no transparent desktop window yet.
+
+Run the real-engine smoke test with the stage closed:
+
+```powershell
+python tools/unreal_runtime_smoke.py --engine-root D:\Programs\EpicGames\UE_5.6
+```
+
+It launches its own stage with isolated input/telemetry files, checks a static stale
+snapshot, skeletal load and cue responses, then verifies timeout, malformed-input
+stop and producer restart. It closes only its own Unreal process. JSON evidence is
+saved under `Saved/Aura/Smoke/`. `-AuraDataDir` is a startup option for isolated
+tests; semantic commands cannot choose files. `-AuraTelemetry` enables at most two
+minutes of development telemetry at 10 Hz, without screenshots or private data.
+
+The following manual route is still useful when replacing the native mannequin
+with a custom Animation Blueprint or MetaHuman.
 
 ## Run the part that works today
 
@@ -24,7 +75,7 @@ Use one producer and one editor instance per project copy.
 1. Install Unreal Engine 5.6 through Epic Games Launcher, plus the Visual Studio
    C++ game-development toolchain and Windows SDK required by that engine release.
    The descriptor targets 5.6; a later installed engine requires selecting that
-   version and validating the build. No engine version has been compile-tested here.
+   version and validating the build. Unreal 5.6.1 has been compile-tested here.
 2. Right-click `unreal/AuraBody/AuraBody.uproject`, generate Visual Studio project
    files, open the generated solution, and build **Development Editor / Win64**.
    Then open the `.uproject`. Alternatively use the installed engine's Build.bat:
@@ -33,9 +84,10 @@ Use one producer and one editor instance per project copy.
    & 'C:\Program Files\Epic Games\UE_5.6\Engine\Build\BatchFiles\Build.bat' AuraBodyEditor Win64 Development '-Project=C:\path\to\Project-Aura\unreal\AuraBody\AuraBody.uproject' -WaitMutex
    ```
 
-3. Create a Basic level with a floor, light and camera. Save it as
+3. For a custom Blueprint replacement, create a Basic level with a floor, light and camera. Save it as
    `/Game/SkeletonZero/L_SkeletonZero`. Set it as the editor/game startup map in
-   Project Settings. No map is supplied, so opening the project alone is not a demo.
+   Project Settings. The native route already supplies a stage; override AuraStageMode in your
+   custom map to avoid spawning a second body.
 4. For the first proof, add the engine's Third Person content pack (or migrate its
    mannequin and dependencies from a local Third Person template project). Use a
    skeletal mesh with its compatible idle/walk animations. A rigid mesh, screenshot
@@ -49,7 +101,8 @@ Use one producer and one editor instance per project copy.
 ## Wire the receiver to the actual rig
 
 The component only exposes validated state; it intentionally knows no asset paths
-or skeleton bone names. Create these Blueprint bindings before claiming a 3D demo:
+or skeleton bone names. AuraRigActor already binds the mannequin. Use these equivalent Blueprint
+bindings for a custom replacement:
 
 | Binding | Exact behavior to implement |
 | --- | --- |
@@ -66,7 +119,7 @@ or skeleton bone names. Create these Blueprint bindings before claiming a 3D dem
 only `Saved/Aura/behavior.json`, rejects malformed/oversized/unsupported snapshots,
 requires an advancing sequence, and idles after one second without fresh valid data.
 A leftover file cannot start animation: each new session needs a second snapshot.
-These C++ behaviors are implemented but await compile/runtime verification.
+These C++ behaviors passed real-engine runtime verification.
 
 Run `python tools/skeleton_zero.py` **after Play In Editor**. Expected checkpoints:
 0s idle; 1s gaze; 2s listening; 4s speaking cue; 4.5s wave; 8s walk 200 cm;
@@ -84,31 +137,39 @@ Record engine version, asset source, compatible skeleton, animations and licensi
 in a local asset manifest before proposing binary assets for the repository.
 Repository MIT licensing does not relicense Epic assets.
 
-## Acceptance evidence still required
+## Remaining acceptance gates
 
-- Successful Editor build, engine/toolchain versions and any source fixes.
-- Runtime capture showing a genuinely skinned skeletal character performing all six
-  behaviors; label synthetic mouth cues and any diagnostic placeholders.
-- Kill the producer while moving/speaking: hold position and close mouth within 1s.
-  Restart it, pause/resume, and try an invalid file without crashes or stale replay.
-- Check a static leftover snapshot cannot animate on a fresh editor run.
+- Bind an assembled MetaHuman and facial rig with audible speech.
+- Replace procedural poses with authored animation and foot-contact IK.
 - Record hardware, resolution, average and worst frame times over a one-minute run.
   Initial target: 60 fps on the test machine; this is a target, not a measured result.
 
 ## Validation of this supporting slice
 
 Windows / Python 3.14.4: `python -m unittest discover -s tests -q` passed all
-94 tests with desktop and MCP dependencies installed, including 12 new controller
+95 tests with desktop and MCP dependencies installed, including controller
 tests and the existing real MCP subprocess round trip. Run
 `python tools/skeleton_zero_smoke.py` for the separate real-time producer/reader
 check: 512 distinct snapshots were observed over 17.14 seconds, covering all six
 cue channels, pause and final idle, with no partial JSON. The smoke exposed a
 Windows file-sharing race; bounded writer retries and transient reader retries
-handle it. This verifies Python/file delivery, not Unreal rendering or C++ behavior.
+handle it. This verifies Python/file delivery separately from the native runtime test.
 
-No Unreal installation was found in the Epic installation registry, common install
-location or executable path on this host. There is no compiled C++ result, asset
-preview, live Realtime session, perception integration or packaged 3D application.
+Unreal 5.6.1 Development Editor / Win64 compiled with Visual Studio 2022 17.14,
+MSVC 14.44.35225 and Windows SDK 10.0.22621.0. Unreal warns that MSVC 14.38 is
+preferred; the installed compiler completed both native and MetaHuman plugin builds.
+The stage loaded Quinn Simple with 89 bones from 128 local template files.
+A visible 17-second recording showed the offline sequence. The real-engine smoke
+checked wrist/foot bone displacement, gaze, movement and input-loss behavior.
+
+On RTX 3090 / Ryzen 9 3900X / 64 GB RAM, a corrected-body run recorded 178 samples
+at 10 Hz. After the first three seconds, sampled mean frame time was 16.667 ms and
+worst 16.682 ms with a 60 fps cap. Requested window size was 1280x720; Windows
+125% DPI produced a 1600x900 capture. These are sampled warm frame times, not an
+every-frame or one-minute benchmark. Cold startup can stall.
+
+There is no live Realtime session, facial lip sync, perception integration or
+packaged transparent desktop application in this slice.
 
 ## Sources checked for this change
 
