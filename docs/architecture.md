@@ -4,9 +4,11 @@
 
 The [Skeleton Zero harness](skeleton-zero.md) adds `aura/embodiment.py` (validated
 semantic state), `tools/skeleton_zero.py` (offline replay/lifecycle), and
-`unreal/AuraBody` (AuraShell C++ receiver scaffold). It runs separately from the
+`unreal/AuraBody` (AuraShell C++ receiver and native skeletal stage). It runs separately from the
 shipped Tk desktop and its profile. See [protocol and future voice/perception
-interfaces](behavior-protocol.md). Unreal source has not yet been compiled here.
+interfaces](behavior-protocol.md). The Unreal 5.6.1 Editor target and real-engine
+smoke have passed locally. AuraStageMode creates the scene; AuraRigActor poses the
+local Quinn skeleton after AuraBehaviorComponent validates each update.
 
 Target path: optional Realtime and consented local perception -> AuraBridge ->
 AuraCore policy/behavior state -> Unreal body. Desktop actions continue through

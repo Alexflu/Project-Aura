@@ -14,8 +14,9 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 **New development direction: real-time 3D embodiment.** The first
 [Skeleton Zero harness](docs/skeleton-zero.md) adds an offline semantic controller
-and Unreal C++ project scaffold. It does not yet include a rigged character or a
-compiled Unreal demo. Follow the [3D roadmap](docs/roadmap.md) and
+and a compiled Unreal stage with a real skeletal mannequin. After the documented
+local setup, open `Launch Skeleton Zero.cmd` for the offline demonstration.
+Facial animation and live conversation remain open. Follow the [3D roadmap](docs/roadmap.md) and
 [behavior protocol](docs/behavior-protocol.md). The downloadable beta below is 2D.
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.

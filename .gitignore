@@ -23,3 +23,5 @@ unreal/**/Saved/
 unreal/**/DerivedDataCache/
 unreal/**/.vs/
 unreal/**/*.sln
+unreal/AuraBody/Content/Characters/
+unreal/AuraBody/Content/Aura/

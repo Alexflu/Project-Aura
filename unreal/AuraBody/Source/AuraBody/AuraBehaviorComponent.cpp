@@ -1,4 +1,5 @@
 #include "AuraBehaviorComponent.h"
+#include "AuraPaths.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformTime.h"
@@ -36,7 +37,7 @@ void UAuraBehaviorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     const double Now = FPlatformTime::Seconds();
-    const FString Path = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("Aura/behavior.json"));
+    const FString Path = FPaths::Combine(AuraDataDirectory(), TEXT("behavior.json"));
     auto Fail = [this, Now](const FString& Reason)
     {
         LastError = Reason;
