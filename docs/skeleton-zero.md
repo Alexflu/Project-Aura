@@ -128,6 +128,14 @@ The timeline is reproducible and is not model-driven behavior.
 
 ## Replace the mannequin with MetaHuman
 
+After building, close any other full editor instance for this project and double-click
+**Open Aura MetaHuman.cmd**, or run `python tools/unreal_body.py open-metahuman`.
+This opens the full editor directly on the preserved local character, preparing it
+if missing. Startup can take several minutes. Script failures appear in
+`unreal/AuraBody/Saved/Logs/AuraBody.log`; successful opening logs
+`AURA_METAHUMAN_EDITOR_OPEN`. Opening the editor does not assemble or connect a
+runtime body. Rigging and assembly remain separate steps inside MetaHuman Creator.
+
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
 engine project. Create and assemble a MetaHuman locally, then bind the same receiver
 to its body/face animation setup. Follow Epic's assembly instructions for the chosen
