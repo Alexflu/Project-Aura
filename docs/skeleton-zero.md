@@ -136,6 +136,19 @@ if missing. Startup can take several minutes. Script failures appear in
 `AURA_METAHUMAN_EDITOR_OPEN`. Opening the editor does not assemble or connect a
 runtime body. Rigging and assembly remain separate steps inside MetaHuman Creator.
 
+The project enables the 16-bit bone indices, unlimited influences, skin cache,
+mesh distance fields and DirectX 12 / Shader Model 6 settings required by this
+local MetaHuman preview. Restart an already-open editor after changing these.
+The launch script explicitly keeps the editor alive after its Python work finishes.
+
+For the next local gate, select **Create Full Rig**. If Epic opens its account
+portal in your browser, complete the sign-in there. The rigging service requires
+that account session; the local mannequin demo does not. After rigging completes,
+download the texture source and select **Assembly > UE Optimized > High**, then
+assemble and save the generated assets. Follow the
+[Unreal 5.6 assembly guide](https://dev.epicgames.com/documentation/metahuman/assembly?application_version=5.6).
+An opened preset or success marker alone is not evidence of an assembled rig.
+
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
 engine project. Create and assemble a MetaHuman locally, then bind the same receiver
 to its body/face animation setup. Follow Epic's assembly instructions for the chosen

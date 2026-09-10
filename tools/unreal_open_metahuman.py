@@ -3,6 +3,8 @@ from pathlib import Path
 import runpy
 import unreal
 
+# ExecutePythonScript otherwise requests editor shutdown as soon as this returns.
+unreal.EditorPythonScripting.set_keep_python_script_alive(True)
 prepared = runpy.run_path(str(Path(__file__).with_name("unreal_prepare_metahuman.py")))
 asset = prepared["asset"]
 editor = unreal.get_editor_subsystem(unreal.AssetEditorSubsystem)
