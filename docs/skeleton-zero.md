@@ -128,6 +128,13 @@ The timeline is reproducible and is not model-driven behavior.
 
 ## Replace the mannequin with MetaHuman
 
+**Appearance target remains the [approved Aura design](../aura/assets/approved-direction.png).**
+The Ada preset is a disposable rigging/animation reference, not a replacement
+character design. Preserve Aura's stylized face, black/violet hair, violet eyes
+and established wardrobe direction when building the final assets. Custom hair,
+clothing and facial shaping may be needed; importing a preset does not achieve
+that likeness.
+
 After building, close any other full editor instance for this project and double-click
 **Open Aura MetaHuman.cmd**, or run `python tools/unreal_body.py open-metahuman`.
 This opens the full editor directly on the preserved local character, preparing it
