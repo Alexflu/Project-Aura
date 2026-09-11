@@ -79,7 +79,7 @@ def launch_command(engine):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman"))
+    parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman", "open-metahuman", "audit-metahuman"))
     parser.add_argument("--engine-root", type=Path)
     args = parser.parse_args()
     engine = (args.engine_root or installed_engine()).resolve()
@@ -90,9 +90,15 @@ def main():
         command = [str(engine / "Engine/Build/BatchFiles/Build.bat"), "AuraBodyEditor", "Win64",
                    "Development", f"-Project={PROJECT}", "-WaitMutex", "-NoHotReloadFromIDE"]
         subprocess.run(command, env=runtime_environment(), check=True)
-    elif args.action == "prepare-metahuman":
+    elif args.action == "open-metahuman":
+        command = [str(editor_path(engine)), str(PROJECT), "-NoSplash",
+                   f"-ExecutePythonScript={ROOT / 'tools/unreal_open_metahuman.py'}"]
+        process = subprocess.Popen(command, env=runtime_environment())
+        print(f"Opening MetaHuman Creator (process {process.pid}). First startup may take several minutes.")
+    elif args.action in ("prepare-metahuman", "audit-metahuman"):
+        script = "unreal_prepare_metahuman.py" if args.action == "prepare-metahuman" else "unreal_audit_metahuman.py"
         command = [str(engine / "Engine/Binaries/Win64/UnrealEditor-Cmd.exe"), str(PROJECT),
-                   "-run=pythonscript", f"-script={ROOT / 'tools/unreal_prepare_metahuman.py'}", "-Unattended", "-NullRHI"]
+                   "-run=pythonscript", f"-script={ROOT / 'tools' / script}", "-Unattended", "-NullRHI"]
         subprocess.run(command, env=runtime_environment(), check=True)
     elif args.action == "demo":
         folder = PROJECT.parent / "Saved/Aura/Demos" / uuid.uuid4().hex[:10]
