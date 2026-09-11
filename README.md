@@ -19,6 +19,8 @@ MetaHuman. After the documented local setup, open `Launch Skeleton Zero.cmd`, or
 `Launch Aura MetaHuman Demo.cmd` for body movement and synthetic jaw animation.
 Audio lip sync and live conversation remain open. Follow the [3D roadmap](docs/roadmap.md) and
 [behavior protocol](docs/behavior-protocol.md). The downloadable beta below is 2D.
+The separate `tools/unreal_speech.py --text "Hello"` prototype adds local Windows
+speech with volume-driven jaw motion; it does not yet produce phoneme lip sync.
 
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
