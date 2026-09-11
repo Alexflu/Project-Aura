@@ -214,6 +214,9 @@ Bounded `metahuman-runtime.jsonl` telemetry accompanies the existing driver log.
 The recorded run passed with a 20.52-degree jaw range and 171 driver samples;
 sampled warm mean/worst frame times were 16.668/16.823 ms on the hardware below.
 These exclude startup stalls and do not constitute a one-minute benchmark.
+A subsequent validation of the final build also passed the behavior checks, but
+sampled 19.447 ms mean with a 400 ms worst frame. Smooth 60 fps is not yet a
+reliable acceptance result; investigate these hitches before performance signoff.
 The next functional gate is audible speech with synchronized facial animation.
 
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
