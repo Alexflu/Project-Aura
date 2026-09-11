@@ -1,6 +1,6 @@
 # Skeleton Zero: local Unreal bring-up
 
-Status: offline Python controller plus a native Unreal mannequin stage. See the
+Status: offline Python controller plus native Unreal mannequin and MetaHuman stages. See the
 runtime validation section below for what has actually been checked. The mannequin
 is a temporary rigged 3D body; it is not Aura's final MetaHuman. There is no audio
 playback or live AI in this harness.
@@ -179,10 +179,42 @@ The local audit passed with **342 body bones and 875 face bones**, plus a clothi
 skeletal component. The commandlet reported zero errors and warnings.
 This proves asset loading/construction, not animation or packaged-game readiness.
 
-Next bind the assembled character to the receiver using a compatible animation
-setup, then validate jaw/face motion against speech playback and body retargeting
-in the real-time stage. Do not replace Quinn's configured mesh with the MetaHuman
-body and assume the temporary procedural poses or facial controls are compatible.
+### Run the assembled MetaHuman
+
+After assembly, audit and a native build, double-click **Launch Aura MetaHuman Demo.cmd**
+or run `python tools/unreal_body.py demo --metahuman`. The launcher waits for the
+MetaHuman adapter before sending the same 17-second offline sequence. For manual
+input use `python tools/unreal_body.py run --metahuman` and then the producer.
+If the Blueprint or required skeleton is missing, Unreal logs the failure and
+keeps Quinn visible; the MetaHuman demo times out with setup guidance. A mannequin
+fallback does not pass the MetaHuman smoke test.
+
+`UAuraMetaHuman` spawns the fixed local assembled Blueprint alongside the hidden
+Quinn pose driver. Its animation proxy transfers common bone rotation deltas by
+name while preserving the target's reference proportions. The face follows the
+body and retains its assembled post-process RigLogic. Inputs are copied on the
+game thread before worker evaluation; explicit tick prerequisites order driver,
+body and face. No asset path is accepted through semantic commands.
+
+The synthetic mouth signal now drives `CTRL_expressions_jawOpen`; `happy` maps to
+the two mouth-corner pull curves. Pause/disconnect zeros these facial controls.
+Other expression and blush values on the HUD remain diagnostic only. There is
+still no audio, phoneme lip sync, live conversation or production foot-contact IK.
+The visible prototype is Ada; the approved Aura appearance above is unchanged.
+
+Run the real-engine check with other stage instances closed:
+
+```powershell
+python tools/unreal_runtime_smoke.py --engine-root D:\Programs\EpicGames\UE_5.6 --metahuman
+```
+
+This checks actual MetaHuman jaw-bone articulation, wrist displacement, stage
+movement and mouth shutdown on input loss, in addition to the receiver checks.
+Bounded `metahuman-runtime.jsonl` telemetry accompanies the existing driver log.
+The recorded run passed with a 20.52-degree jaw range and 171 driver samples;
+sampled warm mean/worst frame times were 16.668/16.823 ms on the hardware below.
+These exclude startup stalls and do not constitute a one-minute benchmark.
+The next functional gate is audible speech with synchronized facial animation.
 
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
 engine project. Create and assemble a MetaHuman locally, then bind the same receiver
@@ -195,7 +227,7 @@ Repository MIT licensing does not relicense Epic assets.
 
 ## Remaining acceptance gates
 
-- Bind an assembled MetaHuman and facial rig with audible speech.
+- Add audible speech and synchronized facial animation to the connected MetaHuman.
 - Replace procedural poses with authored animation and foot-contact IK.
 - Record hardware, resolution, average and worst frame times over a one-minute run.
   Initial target: 60 fps on the test machine; this is a target, not a measured result.

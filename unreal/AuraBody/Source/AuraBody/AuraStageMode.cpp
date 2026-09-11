@@ -1,5 +1,8 @@
 #include "AuraStageMode.h"
 #include "AuraRigActor.h"
+#include "AuraMetaHuman.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "AuraBehaviorComponent.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -28,7 +31,13 @@ void AAuraStageMode::BeginPlay()
 {
     Super::BeginPlay();
     UWorld* World = GetWorld();
-    World->SpawnActor<AAuraRigActor>(FVector::ZeroVector, FRotator::ZeroRotator);
+    AAuraRigActor* Driver = World->SpawnActor<AAuraRigActor>(FVector::ZeroVector, FRotator::ZeroRotator);
+    if (FParse::Param(FCommandLine::Get(), TEXT("AuraMetaHuman")))
+    {
+        UAuraMetaHuman* Adapter = NewObject<UAuraMetaHuman>(Driver);
+        Driver->AddInstanceComponent(Adapter);
+        Adapter->RegisterComponent();
+    }
     AStaticMeshActor* Floor = World->SpawnActor<AStaticMeshActor>(FVector(0, 0, -5), FRotator::ZeroRotator);
     Floor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
     Floor->GetStaticMeshComponent()->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")));
@@ -60,15 +69,16 @@ void AAuraStageHUD::DrawHUD()
     DrawText(TEXT("AURA / SKELETON ZERO"), FLinearColor(.4, .85, 1), 30, 25, nullptr, 1.5f);
     DrawText(TEXT("REAL SKELETAL MESH / AUTHORED OFFLINE CUES / NO LIVE AI"), FLinearColor::White, 30, 55);
     if (!Rig) return;
+    const UAuraMetaHuman* MetaHuman = Rig->FindComponentByClass<UAuraMetaHuman>();
     const UAuraBehaviorComponent* State = Rig->Behavior;
     const FString Status = FString::Printf(TEXT("%s | %s | %s | %d bones"),
         State->bConnected ? (State->bPaused ? TEXT("PAUSED") : TEXT("CONNECTED")) : TEXT("WAITING"),
         *State->Mode, *State->Gesture, Rig->BoneCount);
-    DrawText(Status, FLinearColor::White, 30, 80);
+    DrawText(MetaHuman && MetaHuman->bReady ? Status + TEXT(" / MetaHuman body + face") : Status, FLinearColor::White, 30, 80);
     DrawText(Rig->bRigReady ? State->LastError : Rig->RigError, FLinearColor(1, .6, .4), 30, 103);
     DrawText(FString::Printf(TEXT("Expression: %s %.2f | Posture: %s | Blush: %.2f"),
         *State->Expression, State->ExpressionIntensity, *State->Posture, State->Blush), FLinearColor::White, 30, 125);
-    DrawText(TEXT("Synthetic mouth cue (mannequin has no facial rig)"), FLinearColor::White, 30, 148);
+    DrawText(MetaHuman && MetaHuman->bReady ? TEXT("MetaHuman jaw control / synthetic cue / no audio") : TEXT("Synthetic mouth cue (mannequin has no facial rig)"), FLinearColor::White, 30, 148);
     DrawRect(FLinearColor(.1, .15, .2), 340, 150, 150, 12);
     DrawRect(FLinearColor(.3, .9, .8), 340, 150, 150 * State->MouthOpen, 12);
     const double Dt = FApp::GetDeltaTime();
