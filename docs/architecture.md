@@ -16,6 +16,13 @@ approved adapters. The renderer never gains computer permissions from a gesture.
 The current demo connects only the offline controller to a local snapshot file;
 Realtime, perception, product Pause integration and desktop embedding remain open.
 
+The optional `UAuraMetaHuman` adapter spawns the locally assembled Ada prototype,
+uses hidden Quinn poses to drive common body bones, and passes synthetic jaw and
+happy mouth-corner curves through the assembled face's RigLogic. Animation proxies
+snapshot inputs on the game thread before worker evaluation. The adapter accepts
+no asset paths from the behavior protocol. Its launcher, measured capabilities and
+remaining animation limitations are documented in [Skeleton Zero](skeleton-zero.md).
+
 ## Implemented components
 
 | Layer | Implementation | Responsibility |

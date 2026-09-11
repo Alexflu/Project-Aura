@@ -72,15 +72,16 @@ def prepare(engine):
     print(f"Prepared {len(inventory)} local template files. Provenance: {manifest}")
 
 
-def launch_command(engine):
+def launch_command(engine, metahuman=False):
     return [str(editor_path(engine)), str(PROJECT), "-game", "-windowed", "-ResX=1280", "-ResY=720",
-            "-NoSplash", "-NoSound", "-ExecCmds=t.MaxFPS 60"]
+            "-NoSplash", "-NoSound", "-ExecCmds=t.MaxFPS 60"] + (["-AuraMetaHuman"] if metahuman else [])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman", "open-metahuman", "audit-metahuman"))
     parser.add_argument("--engine-root", type=Path)
+    parser.add_argument("--metahuman", action="store_true", help="Use the locally assembled MetaHuman for run/demo")
     args = parser.parse_args()
     engine = (args.engine_root or installed_engine()).resolve()
     editor_path(engine)
@@ -103,7 +104,7 @@ def main():
     elif args.action == "demo":
         folder = PROJECT.parent / "Saved/Aura/Demos" / uuid.uuid4().hex[:10]
         folder.mkdir(parents=True)
-        process = subprocess.Popen(launch_command(engine) + ["-AuraTelemetry", f"-AuraDataDir={folder}"], env=runtime_environment())
+        process = subprocess.Popen(launch_command(engine, args.metahuman) + ["-AuraTelemetry", f"-AuraDataDir={folder}"], env=runtime_environment())
         try:
             deadline = time.monotonic() + 180
             telemetry = folder / "runtime.jsonl"
@@ -113,11 +114,12 @@ def main():
                 if telemetry.is_file():
                     lines = telemetry.read_text(encoding="utf-8").splitlines(keepends=True)
                     complete = [line for line in lines if line.endswith("\n")]
-                    if complete and json.loads(complete[-1])["rig_ready"]:
+                    meta_ready = not args.metahuman or (folder / "metahuman-runtime.jsonl").is_file()
+                    if complete and json.loads(complete[-1])["rig_ready"] and meta_ready:
                         break
                 time.sleep(.25)
             else:
-                raise RuntimeError("Stage did not become ready; run prepare and build first")
+                raise RuntimeError("Stage did not become ready; run prepare/build and, for MetaHuman, assemble and audit first")
             subprocess.run([sys.executable, str(ROOT / "tools/skeleton_zero.py"), "--output", str(folder / "behavior.json")], check=True)
             print("Replay finished. The offline stage will remain open until you close it.", flush=True)
             process.wait()
@@ -127,7 +129,7 @@ def main():
                 process.wait(timeout=15)
     else:
         print("Opening a visible offline Unreal stage. Start tools/skeleton_zero.py to send cues.")
-        subprocess.run(launch_command(engine), env=runtime_environment(), check=True)
+        subprocess.run(launch_command(engine, args.metahuman), env=runtime_environment(), check=True)
 
 
 if __name__ == "__main__":

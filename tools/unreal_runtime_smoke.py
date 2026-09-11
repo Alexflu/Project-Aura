@@ -25,6 +25,7 @@ def read_samples(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine-root", type=Path, required=True)
+    parser.add_argument("--metahuman", action="store_true")
     args = parser.parse_args()
     folder = PROJECT.parent / "Saved/Aura/Smoke" / uuid.uuid4().hex[:10]
     folder.mkdir(parents=True)
@@ -33,7 +34,7 @@ def main():
     controller = BehaviorController()
     controller.apply({"version": 1, "id": "stale-speech", "action": "speak", "params": {"duration_s": 10}})
     write_snapshot(snapshot, controller.snapshot())
-    command = launch_command(args.engine_root) + ["-Unattended", "-AuraTelemetry", f"-AuraDataDir={folder}"]
+    command = launch_command(args.engine_root, args.metahuman) + ["-Unattended", "-AuraTelemetry", f"-AuraDataDir={folder}"]
     process = subprocess.Popen(command, env=runtime_environment())
     try:
         deadline = time.monotonic() + 180
@@ -81,6 +82,18 @@ def main():
                   "checks": ["skeletal_mesh", "static_leftover", "six_cue_channels", "producer_restart",
                              "stale_disconnect", "malformed_input_stop"],
                   "limits": "Sampled frame times; offline cues; mannequin has no facial rig or audio."}
+        if args.metahuman:
+            meta = read_samples(folder / "metahuman-runtime.jsonl")
+            assert meta, "MetaHuman adapter did not start; mannequin fallback is not a pass"
+            assert max(s["jaw_curve"] for s in meta) > .5, "Face animation received no jaw curve"
+            jaw_range = max(s["jaw_rotation_degrees"] for s in meta) - min(s["jaw_rotation_degrees"] for s in meta)
+            assert jaw_range > 5, f"Facial jaw bone did not articulate: {jaw_range} degrees"
+            assert max(s["wrist_z"] for s in meta) - min(s["wrist_z"] for s in meta) > 30
+            assert max(s["x"] for s in meta) > 180
+            assert all(s["jaw_curve"] == 0 for s in meta[-3:]), "Disconnected MetaHuman jaw stayed active"
+            report["metahuman_jaw_range_degrees"] = jaw_range
+            report["checks"] += ["metahuman_jaw_bone", "metahuman_wrist", "metahuman_movement", "metahuman_disconnect"]
+            report["limits"] = "Sampled frame times; synthetic facial controls, no audio or live AI; prototype retargeting."
         (folder / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(json.dumps(report, indent=2))
         print(f"Evidence: {folder}")
