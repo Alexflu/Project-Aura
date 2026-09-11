@@ -96,9 +96,9 @@ def main():
             assert max(s["eyeBlinkL"] for s in meta) > .5, "Blink never closed"
             # Hold the mouth silent while checking independent facial expression poses.
             poses = {}
-            for expression in ("neutral", "curious", "happy", "concerned", "neutral"):
-                controller = BehaviorController()
-                controller.apply({"version": 1, "id": "face", "action": "expression",
+            controller = BehaviorController()
+            for index, expression in enumerate(("neutral", "curious", "happy", "concerned", "neutral")):
+                controller.apply({"version": 1, "id": f"face-{index}", "action": "expression",
                                   "params": {"name": expression, "intensity": 1}})
                 for _ in range(40):
                     write_snapshot(snapshot, controller.snapshot())
