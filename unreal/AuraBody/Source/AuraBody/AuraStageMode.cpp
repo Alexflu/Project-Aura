@@ -79,7 +79,9 @@ void AAuraStageHUD::DrawHUD()
     DrawText(Rig->bRigReady ? State->LastError : Rig->RigError, FLinearColor(1, .6, .4), 30, 103);
     DrawText(FString::Printf(TEXT("Expression: %s %.2f | Posture: %s | Blush: %.2f"),
         *State->Expression, State->ExpressionIntensity, *State->Posture, State->Blush), FLinearColor::White, 30, 125);
-    DrawText(MetaHuman && MetaHuman->bReady ? TEXT("MetaHuman jaw control / synthetic cue / no audio") : TEXT("Synthetic mouth cue (mannequin has no facial rig)"), FLinearColor::White, 30, 148);
+    const bool SpeechAudio = FParse::Param(FCommandLine::Get(), TEXT("AuraSpeechAudio"));
+    DrawText(SpeechAudio ? TEXT("Local speech / volume-driven jaw / no live AI") :
+        (MetaHuman && MetaHuman->bReady ? TEXT("MetaHuman jaw control / synthetic cue / no audio") : TEXT("Synthetic mouth cue (mannequin has no facial rig)")), FLinearColor::White, 30, 148);
     DrawRect(FLinearColor(.1, .15, .2), 340, 150, 150, 12);
     DrawRect(FLinearColor(.3, .9, .8), 340, 150, 150 * State->MouthOpen, 12);
     const double Dt = FApp::GetDeltaTime();

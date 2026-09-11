@@ -225,7 +225,8 @@ These exclude startup stalls and do not constitute a one-minute benchmark.
 A subsequent validation of the final build also passed the behavior checks, but
 sampled 19.447 ms mean with a 400 ms worst frame. Smooth 60 fps is not yet a
 reliable acceptance result; investigate these hitches before performance signoff.
-The next functional gate is audible speech with synchronized facial animation.
+The separate local speech route below connects audio-envelope jaw motion; the
+next facial gate is phoneme-shaped lip sync.
 
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
 engine project. Create and assemble a MetaHuman locally, then bind the same receiver
@@ -238,7 +239,35 @@ Repository MIT licensing does not relicense Epic assets.
 
 ## Remaining acceptance gates
 
-- Add audible speech and synchronized facial animation to the connected MetaHuman.
+### Local audible speech prototype
+
+After building and assembling the MetaHuman, run:
+
+```powershell
+python tools/unreal_speech.py --text "Hello Alex. This is local speech playback."
+```
+
+This opens its own stage, waits for the MetaHuman receiver to connect, synthesizes
+text using the installed Windows voice, and sends the existing audio envelope to
+the jaw while Windows plays the clip. It closes its own stage after playback.
+Ctrl+C, renderer exit, loss of renderer telemetry or a playback error stop audio.
+The adapter also stops audio when paused; there is not yet a product pause button
+for this command-line prototype. Text is limited to 1,000 characters and each
+playback session to 110 seconds including synthesis. Temporary audio is cleaned up.
+No text, paths or device commands have been added to the semantic protocol.
+
+This is volume-driven jaw movement timed from the local playback start, not
+phoneme-shaped lip sync or an audio-device sample clock. Device buffering can
+introduce an offset. There is no microphone, live Realtime conversation, or
+automatic speech triggered by the existing silent demo. Force-killing the helper
+can bypass its cleanup; ordinary interruption and renderer loss use explicit stop.
+
+The first local Windows speech run completed with 97 MetaHuman telemetry samples,
+a 22.81-degree jaw range, and zero mouth/jaw values at completion. The Unreal build
+and 105 Python tests passed, including playback-envelope silence, pause and error
+cleanup. This does not measure acoustic output latency or phoneme accuracy.
+
+- Replace approximate audio-envelope jaw movement with phoneme-shaped facial animation.
 - Replace procedural poses with authored animation and foot-contact IK.
 - Record hardware, resolution, average and worst frame times over a one-minute run.
   Initial target: 60 fps on the test machine; this is a target, not a measured result.
