@@ -24,6 +24,10 @@ public:
     TArray<FTransform> LocalPose;
     float Jaw = 0;
     float Smile = 0;
+    float Curious = 0;
+    float Concerned = 0;
+    float Blink = 0;
+    float BlinkTime = 0;
     bool bFace = false;
 
     virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
@@ -34,7 +38,16 @@ public:
         const auto* State = Anim->Behavior.Get();
         const bool Active = State && State->bConnected && !State->bPaused;
         Jaw = Active ? State->MouthOpen : 0;
-        Smile = Active && State->Expression == TEXT("happy") ? State->ExpressionIntensity : 0;
+        // Blend expression changes; pause/input loss clears all facial activity.
+        auto Blend = [Active, DeltaSeconds](float Current, float Target)
+        { return Active ? FMath::Lerp(Current, Target, 1.f - FMath::Exp(-6.f * DeltaSeconds)) : 0.f; };
+        Smile = Blend(Smile, Active && State->Expression == TEXT("happy") ? State->ExpressionIntensity : 0);
+        Curious = Blend(Curious, Active && State->Expression == TEXT("curious") ? State->ExpressionIntensity : 0);
+        Concerned = Blend(Concerned, Active && State->Expression == TEXT("concerned") ? State->ExpressionIntensity : 0);
+        if (Active) BlinkTime += DeltaSeconds;
+        else BlinkTime = 0;
+        const float BlinkPhase = FMath::Fmod(BlinkTime, 3.7f);
+        Blink = Active && BlinkPhase > 3.45f ? FMath::Sin((BlinkPhase - 3.45f) / .25f * PI) : 0;
         const USkeletalMesh* TargetMesh = GetSkelMeshComponent()->GetSkeletalMeshAsset();
         const USkinnedMeshComponent* Source = Anim->PoseSource;
         const USkeletalMesh* SourceMesh = Source ? Cast<USkeletalMesh>(Source->GetSkinnedAsset()) : nullptr;
@@ -86,6 +99,18 @@ public:
             Output.Curve.Set(TEXT("CTRL_expressions_jawOpen"), Jaw);
             Output.Curve.Set(TEXT("CTRL_expressions_mouthCornerPullL"), Smile);
             Output.Curve.Set(TEXT("CTRL_expressions_mouthCornerPullR"), Smile);
+            Output.Curve.Set(TEXT("CTRL_expressions_eyeCheekRaiseL"), Smile * .45f);
+            Output.Curve.Set(TEXT("CTRL_expressions_eyeCheekRaiseR"), Smile * .45f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browRaiseInL"), Curious * .6f + Concerned * .7f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browRaiseInR"), Curious * .25f + Concerned * .7f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browRaiseOuterL"), Curious * .65f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browRaiseOuterR"), Curious * .15f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browDownL"), Concerned * .3f);
+            Output.Curve.Set(TEXT("CTRL_expressions_browDownR"), Concerned * .3f);
+            Output.Curve.Set(TEXT("CTRL_expressions_mouthCornerDepressL"), Concerned * .4f);
+            Output.Curve.Set(TEXT("CTRL_expressions_mouthCornerDepressR"), Concerned * .4f);
+            Output.Curve.Set(TEXT("CTRL_expressions_eyeBlinkL"), Blink);
+            Output.Curve.Set(TEXT("CTRL_expressions_eyeBlinkR"), Blink);
         }
         return true;
     }
@@ -164,6 +189,15 @@ void UAuraMetaHuman::TickComponent(float Dt, ELevelTick TickType, FActorComponen
     Data->SetBoolField(TEXT("paused"), Driver->Behavior->bPaused);
     Data->SetNumberField(TEXT("mouth"), Driver->Behavior->MouthOpen);
     Data->SetNumberField(TEXT("jaw_curve"), Face->GetAnimInstance()->GetCurveValue(TEXT("CTRL_expressions_jawOpen")));
+    for (const TCHAR* Curve : {TEXT("browRaiseOuterL"), TEXT("mouthCornerPullL"), TEXT("mouthCornerDepressL"), TEXT("eyeBlinkL")})
+        Data->SetNumberField(Curve, Face->GetAnimInstance()->GetCurveValue(FName(*(FString(TEXT("CTRL_expressions_")) + Curve))));
+    for (const TCHAR* Bone : {TEXT("FACIAL_L_LipCorner"), TEXT("FACIAL_L_EyelidUpperA")})
+    {
+        const FVector Position = Face->GetSocketTransform(FName(Bone), RTS_ParentBoneSpace).GetLocation();
+        TArray<TSharedPtr<FJsonValue>> Coordinates;
+        for (double Value : {Position.X, Position.Y, Position.Z}) Coordinates.Add(MakeShared<FJsonValueNumber>(Value));
+        Data->SetArrayField(Bone, Coordinates);
+    }
     Data->SetNumberField(TEXT("jaw_z"), Face->GetBoneLocation(TEXT("FACIAL_C_Jaw"), EBoneSpaces::ComponentSpace).Z);
     Data->SetNumberField(TEXT("jaw_angle"), Face->GetSocketTransform(TEXT("FACIAL_C_Jaw"), RTS_ParentBoneSpace).Rotator().Pitch);
     const FQuat JawRotation = Face->GetSocketTransform(TEXT("FACIAL_C_Jaw"), RTS_ParentBoneSpace).GetRotation();

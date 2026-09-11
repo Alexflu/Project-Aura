@@ -51,7 +51,8 @@ void AAuraStageMode::BeginPlay()
     Front->GetLightComponent()->SetIntensity(16000);
     Front->PointLightComponent->SetAttenuationRadius(1000);
     ACameraActor* Camera = World->SpawnActor<ACameraActor>();
-    const FVector CameraPosition(470, -520, 240);
+    // Present the face from the same side as the authored gaze target.
+    const FVector CameraPosition(600, 350, 210);
     Camera->SetActorLocation(CameraPosition);
     Camera->SetActorRotation((FVector(60, 0, 95) - CameraPosition).Rotation());
     Camera->GetCameraComponent()->SetFieldOfView(40);
