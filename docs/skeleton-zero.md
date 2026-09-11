@@ -156,6 +156,34 @@ assemble and save the generated assets. Follow the
 [Unreal 5.6 assembly guide](https://dev.epicgames.com/documentation/metahuman/assembly?application_version=5.6).
 An opened preset or success marker alone is not evidence of an assembled rig.
 
+### Verified local assembly
+
+The development host has now completed Full Rig (joints and blend shapes),
+downloaded 4K face/body texture sources and assembled **UE Optimized / High**.
+The saved prototype Blueprint is
+`/Game/MetaHumans/AuraPrototype_Ada/BP_AuraPrototype_Ada`.
+The authoring character remains `/Game/Aura/Characters/AuraPrototype_Ada`.
+Both are locally licensed prototype assets, ignored by Git along with their
+shared `Content/MetaHumans` dependencies.
+
+After assembling and saving on another machine, verify the assets with:
+
+```powershell
+python tools/unreal_body.py audit-metahuman
+```
+
+This starts a separate Unreal commandlet, loads the Blueprint, constructs a
+temporary actor, verifies skeletal Body and Face components and destroys the
+actor without saving a level. Evidence goes to `Saved/Aura/metahuman-audit.json`.
+The local audit passed with **342 body bones and 875 face bones**, plus a clothing
+skeletal component. The commandlet reported zero errors and warnings.
+This proves asset loading/construction, not animation or packaged-game readiness.
+
+Next bind the assembled character to the receiver using a compatible animation
+setup, then validate jaw/face motion against speech playback and body retargeting
+in the real-time stage. Do not replace Quinn's configured mesh with the MetaHuman
+body and assume the temporary procedural poses or facial controls are compatible.
+
 Install MetaHuman Creator Core Data and enable the MetaHuman Creator plugin in the
 engine project. Create and assemble a MetaHuman locally, then bind the same receiver
 to its body/face animation setup. Follow Epic's assembly instructions for the chosen
