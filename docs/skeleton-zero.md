@@ -196,9 +196,15 @@ body and retains its assembled post-process RigLogic. Inputs are copied on the
 game thread before worker evaluation; explicit tick prerequisites order driver,
 body and face. No asset path is accepted through semantic commands.
 
-The synthetic mouth signal now drives `CTRL_expressions_jawOpen`; `happy` maps to
-the two mouth-corner pull curves. Pause/disconnect zeros these facial controls.
-Other expression and blush values on the HUD remain diagnostic only. There is
+The synthetic mouth signal drives `CTRL_expressions_jawOpen`. `happy` blends
+mouth-corner pull with cheek raise; `curious` raises the brows asymmetrically;
+`concerned` blends inner-brow raise, brow lowering and mouth-corner depression.
+Expression weights ease toward their targets rather than switching abruptly.
+A 250 ms procedural blink repeats every 3.7 seconds while connected and active.
+Pause/disconnect immediately zeros facial controls and resets the blink clock.
+These are authored expression mappings, not inferred emotion. Blush remains a
+diagnostic value without a material binding. The stage camera is now on the same
+side as the initial gaze target so the face is easier to inspect. There is
 still no audio, phoneme lip sync, live conversation or production foot-contact IK.
 The visible prototype is Ada; the approved Aura appearance above is unchanged.
 
@@ -210,6 +216,8 @@ python tools/unreal_runtime_smoke.py --engine-root D:\Programs\EpicGames\UE_5.6 
 
 This checks actual MetaHuman jaw-bone articulation, wrist displacement, stage
 movement and mouth shutdown on input loss, in addition to the receiver checks.
+It also checks expression curves, actual lip-corner bone deformation with a silent
+jaw, blink activity and clearing an active smile on pause.
 Bounded `metahuman-runtime.jsonl` telemetry accompanies the existing driver log.
 The recorded run passed with a 20.52-degree jaw range and 171 driver samples;
 sampled warm mean/worst frame times were 16.668/16.823 ms on the hardware below.

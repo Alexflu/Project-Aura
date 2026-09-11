@@ -1,6 +1,7 @@
 """Launch the real Unreal stage and check its receiver/rig telemetry end to end."""
 import argparse
 import json
+import math
 from pathlib import Path
 import statistics
 import subprocess
@@ -91,6 +92,38 @@ def main():
             assert max(s["wrist_z"] for s in meta) - min(s["wrist_z"] for s in meta) > 30
             assert max(s["x"] for s in meta) > 180
             assert all(s["jaw_curve"] == 0 for s in meta[-3:]), "Disconnected MetaHuman jaw stayed active"
+            assert all(s[key] == 0 for s in meta[-3:] for key in ("eyeBlinkL", "browRaiseOuterL", "mouthCornerPullL", "mouthCornerDepressL")), "Disconnected facial controls stayed active"
+            assert max(s["eyeBlinkL"] for s in meta) > .5, "Blink never closed"
+            # Hold the mouth silent while checking independent facial expression poses.
+            poses = {}
+            for expression in ("neutral", "curious", "happy", "concerned", "neutral"):
+                controller = BehaviorController()
+                controller.apply({"version": 1, "id": "face", "action": "expression",
+                                  "params": {"name": expression, "intensity": 1}})
+                for _ in range(40):
+                    write_snapshot(snapshot, controller.snapshot())
+                    controller.tick(1 / 30)
+                    time.sleep(1 / 30)
+                poses[expression] = read_samples(folder / "metahuman-runtime.jsonl")[-1]
+            assert poses["curious"]["browRaiseOuterL"] > .6
+            assert poses["happy"]["mouthCornerPullL"] > .95
+            assert poses["concerned"]["mouthCornerDepressL"] > .38
+            for expression in ("happy", "concerned"):
+                assert math.dist(poses[expression]["FACIAL_L_LipCorner"], poses["neutral"]["FACIAL_L_LipCorner"]) > .01, "Expression did not deform lip bone"
+            controller.apply({"version": 1, "id": "active-face", "action": "expression", "params": {"name": "happy", "intensity": 1}})
+            for _ in range(30):
+                write_snapshot(snapshot, controller.snapshot())
+                controller.tick(1 / 30)
+                time.sleep(1 / 30)
+            assert read_samples(folder / "metahuman-runtime.jsonl")[-1]["mouthCornerPullL"] > .9
+            controller.apply({"version": 1, "id": "pause-face", "action": "pause", "params": {}})
+            for _ in range(15):
+                write_snapshot(snapshot, controller.snapshot())
+                controller.tick(1 / 30)
+                time.sleep(1 / 30)
+            stopped = read_samples(folder / "metahuman-runtime.jsonl")[-1]
+            assert all(stopped[key] == 0 for key in ("eyeBlinkL", "browRaiseOuterL", "mouthCornerPullL", "mouthCornerDepressL"))
+            report["checks"] += ["facial_expression_bones", "blink", "facial_pause"]
             report["metahuman_jaw_range_degrees"] = jaw_range
             report["checks"] += ["metahuman_jaw_bone", "metahuman_wrist", "metahuman_movement", "metahuman_disconnect"]
             report["limits"] = "Sampled frame times; synthetic facial controls, no audio or live AI; prototype retargeting."
