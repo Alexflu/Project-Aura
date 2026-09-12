@@ -153,11 +153,27 @@ void AAuraRigActor::RecordSample(float DeltaSeconds)
 {
     const double Now = FPlatformTime::Seconds();
     // Explicit development diagnostics, bounded to two minutes at 10 Hz.
-    if (!bTelemetry || Now - StartedAt > 120 || Now - LastSample < .1) return;
+    if (!bTelemetry || Now - StartedAt > 120) return;
+    // Tick delta may be clamped by Unreal. Measure every actual interval, while
+    // still writing only ten samples per second. Exclude the first three seconds.
+    if (LastFrameAt > 0 && LastFrameAt - StartedAt >= 3)
+    {
+        const double Interval = Now - LastFrameAt;
+        FrameIntervalTotal += Interval;
+        FrameIntervalWorst = FMath::Max(FrameIntervalWorst, Interval);
+        ++MeasuredFrames;
+        if (Interval > .05) ++FramesOver50Ms;
+    }
+    LastFrameAt = Now;
+    if (Now - LastSample < .1) return;
     LastSample = Now;
     TSharedRef<FJsonObject> Data = MakeShared<FJsonObject>();
     Data->SetNumberField(TEXT("elapsed_s"), Now - StartedAt);
     Data->SetNumberField(TEXT("frame_ms"), DeltaSeconds * 1000);
+    Data->SetNumberField(TEXT("measured_frames"), MeasuredFrames);
+    Data->SetNumberField(TEXT("frame_interval_total_s"), FrameIntervalTotal);
+    Data->SetNumberField(TEXT("frame_interval_worst_ms"), FrameIntervalWorst * 1000);
+    Data->SetNumberField(TEXT("frames_over_50ms"), FramesOver50Ms);
     Data->SetBoolField(TEXT("rig_ready"), bRigReady);
     Data->SetNumberField(TEXT("bones"), BoneCount);
     Data->SetBoolField(TEXT("connected"), Behavior->bConnected);
