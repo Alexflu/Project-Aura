@@ -202,6 +202,13 @@ mouth-corner pull with cheek raise; `curious` raises the brows asymmetrically;
 Expression weights ease toward their targets rather than switching abruptly.
 A 250 ms procedural blink repeats every 3.7 seconds while connected and active.
 Pause/disconnect immediately zeros facial controls and resets the blink clock.
+Eye gaze is an exception: it holds its last orientation alongside the paused head.
+The MetaHuman eyes use the remaining angle between the target and the current
+head turn, capped at 20 degrees horizontally and 12 vertically before conversion
+to bounded rig curves. The eyes ease faster than the head, leading a turn and
+settling as the head catches up. These angle limits describe controller input;
+the actual ocular rotation depends on the MetaHuman rig's curve calibration.
+Both eyes share the target direction; close-range convergence is not implemented.
 These are authored expression mappings, not inferred emotion. Blush remains a
 diagnostic value without a material binding. The stage camera is now on the same
 side as the initial gaze target so the face is easier to inspect. There is
@@ -218,6 +225,8 @@ This checks actual MetaHuman jaw-bone articulation, wrist displacement, stage
 movement and mouth shutdown on input loss, in addition to the receiver checks.
 It also checks expression curves, actual lip-corner bone deformation with a silent
 jaw, blink activity and clearing an active smile on pause.
+Opposite gaze targets must also rotate both actual eye bones, and a paused gaze
+must hold steady. This does not establish final eye-contact or artistic quality.
 Bounded `metahuman-runtime.jsonl` telemetry accompanies the existing driver log.
 The recorded run passed with a 20.52-degree jaw range and 171 driver samples;
 sampled warm mean/worst frame times were 16.668/16.823 ms on the hardware below.

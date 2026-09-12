@@ -123,6 +123,29 @@ def main():
                 time.sleep(1 / 30)
             stopped = read_samples(folder / "metahuman-runtime.jsonl")[-1]
             assert all(stopped[key] == 0 for key in ("eyeBlinkL", "browRaiseOuterL", "mouthCornerPullL", "mouthCornerDepressL"))
+            controller.apply({"version": 1, "id": "resume-eyes", "action": "resume", "params": {}})
+            eyes = []
+            for index, y in enumerate((-500, 500)):
+                controller.apply({"version": 1, "id": f"eyes-{index}", "action": "look_at",
+                                  "params": {"x": 100, "y": y, "z": 160}})
+                for _ in range(45):
+                    write_snapshot(snapshot, controller.snapshot())
+                    controller.tick(1 / 30)
+                    time.sleep(1 / 30)
+                eyes.append(read_samples(folder / "metahuman-runtime.jsonl")[-1])
+            def angle(a, b):
+                return math.degrees(2 * math.acos(min(1, abs(sum(x * y for x, y in zip(a, b))))))
+            for bone in ("FACIAL_L_Eye", "FACIAL_R_Eye"):
+                assert angle(eyes[0][bone], eyes[1][bone]) > 5, "Eye bone did not follow gaze"
+            controller.apply({"version": 1, "id": "pause-eyes", "action": "pause", "params": {}})
+            for _ in range(15):
+                write_snapshot(snapshot, controller.snapshot())
+                controller.tick(1 / 30)
+                time.sleep(1 / 30)
+            held = read_samples(folder / "metahuman-runtime.jsonl")[-3:]
+            for bone in ("FACIAL_L_Eye", "FACIAL_R_Eye"):
+                assert angle(held[0][bone], held[-1][bone]) < .1, "Paused eyes drifted"
+            report["checks"] += ["eye_gaze_bones", "eye_pause_hold"]
             report["checks"] += ["facial_expression_bones", "blink", "facial_pause"]
             report["metahuman_jaw_range_degrees"] = jaw_range
             report["checks"] += ["metahuman_jaw_bone", "metahuman_wrist", "metahuman_movement", "metahuman_disconnect"]
