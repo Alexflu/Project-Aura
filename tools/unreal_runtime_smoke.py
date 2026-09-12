@@ -162,6 +162,31 @@ def main():
             report["metahuman_jaw_range_degrees"] = jaw_range
             report["checks"] += ["metahuman_jaw_bone", "metahuman_wrist", "metahuman_movement", "metahuman_disconnect"]
             report["limits"] = "Sampled frame times; synthetic facial controls, no audio or live AI; prototype retargeting."
+        # Exercise a short nod through onset, expiry and recovery with steady gaze.
+        controller = BehaviorController()
+        for _ in range(30):
+            write_snapshot(snapshot, controller.snapshot())
+            controller.tick(1 / 30)
+            time.sleep(1 / 30)
+        transition_start = len(read_samples(telemetry))
+        controller.apply({"version": 1, "id": "nod-transition", "action": "gesture", "params": {"name": "nod", "duration_s": .8}})
+        controller.apply({"version": 1, "id": "attend-transition", "action": "posture", "params": {"name": "attentive"}})
+        for _ in range(60):
+            write_snapshot(snapshot, controller.snapshot())
+            controller.tick(1 / 30)
+            time.sleep(1 / 30)
+        transition = read_samples(telemetry)[transition_start:]
+        assert max(s["nod_weight"] for s in transition) > .9
+        assert transition[-1]["nod_weight"] < .01, "Expired nod did not settle"
+        assert max(s["head_local_rotation_degrees"] for s in transition) - min(s["head_local_rotation_degrees"] for s in transition) > 4, "Nod did not articulate head"
+        assert any(.05 < s["attentive_weight"] < .9 for s in transition), "Posture snapped on"
+        controller.apply({"version": 1, "id": "relax-transition", "action": "posture", "params": {"name": "relaxed"}})
+        for _ in range(30):
+            write_snapshot(snapshot, controller.snapshot())
+            controller.tick(1 / 30)
+            time.sleep(1 / 30)
+        assert read_samples(telemetry)[-1]["attentive_weight"] < .02, "Posture did not settle"
+        report["checks"] += ["nod_onset_and_recovery", "posture_blending"]
         if args.performance_seconds:
             controller = BehaviorController()
             deadline = time.monotonic() + args.performance_seconds
