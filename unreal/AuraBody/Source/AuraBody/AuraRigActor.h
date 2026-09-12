@@ -7,6 +7,7 @@
 class UAuraBehaviorComponent;
 class UPoseableMeshComponent;
 class USkeletalMesh;
+class USkeletalMeshComponent;
 
 // Disposable mannequin harness. The semantic receiver is independent of this rig.
 UCLASS(Config=Game)
@@ -25,8 +26,11 @@ public:
     UPROPERTY(BlueprintReadOnly) bool bRigReady = false;
     UPROPERTY(BlueprintReadOnly) FString RigError;
     UPROPERTY(BlueprintReadOnly) int32 BoneCount = 0;
+    UPROPERTY(BlueprintReadOnly) bool bAuthoredMotion = false;
 
 private:
+    UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> IdleSource;
+    UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> WalkSource;
     FVector StageOrigin;
     float MotionTime = 0;
     float WalkWeight = 0;
@@ -35,6 +39,7 @@ private:
     float NodTime = 0;
     float AttentiveWeight = 0;
     bool bWasNodding = false;
+    bool bAuthoredPoseApplied = false;
     float GazeYaw = 0;
     float GazePitch = 0;
     TArray<FTransform> ReferenceLocal;

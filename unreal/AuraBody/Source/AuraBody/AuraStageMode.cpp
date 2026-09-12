@@ -46,7 +46,7 @@ void AAuraStageMode::BeginPlay()
     Light->GetLightComponent()->SetIntensity(4);
     ASkyLight* Fill = World->SpawnActor<ASkyLight>();
     Fill->GetLightComponent()->SetIntensity(1);
-    APointLight* Front = World->SpawnActor<APointLight>(FVector(250, -300, 230), FRotator::ZeroRotator);
+    APointLight* Front = World->SpawnActor<APointLight>(FVector(300, 250, 230), FRotator::ZeroRotator);
     Front->GetLightComponent()->SetMobility(EComponentMobility::Movable);
     Front->GetLightComponent()->SetIntensity(16000);
     Front->PointLightComponent->SetAttenuationRadius(1000);

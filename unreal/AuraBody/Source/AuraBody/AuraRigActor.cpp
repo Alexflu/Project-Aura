@@ -2,6 +2,8 @@
 #include "AuraBehaviorComponent.h"
 #include "AuraPaths.h"
 #include "Components/PoseableMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
@@ -21,6 +23,17 @@ AAuraRigActor::AAuraRigActor()
     Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     Body->SetRelativeRotation(FRotator(0, -90, 0));
     Behavior = CreateDefaultSubobject<UAuraBehaviorComponent>(TEXT("Behavior"));
+    IdleSource = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("IdleAnimationSource"));
+    WalkSource = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WalkAnimationSource"));
+    for (USkeletalMeshComponent* Source : {IdleSource.Get(), WalkSource.Get()})
+    {
+        Source->SetupAttachment(RootComponent);
+        Source->SetVisibility(false);
+        Source->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Source->PrimaryComponentTick.bStartWithTickEnabled = false;
+        Source->bEnableUpdateRateOptimizations = false;
+        Source->SetDisablePostProcessBlueprint(true);
+    }
 }
 
 void AAuraRigActor::BeginPlay()
@@ -64,6 +77,20 @@ void AAuraRigActor::BeginPlay()
         }
     }
     bRigReady = true;
+    UAnimSequence* Idle = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Unarmed/MM_Idle.MM_Idle"));
+    UAnimSequence* Walk = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Walk/MF_Unarmed_Walk_Fwd.MF_Unarmed_Walk_Fwd"));
+    if (Idle && Walk && Idle->GetSkeleton() == Mesh->GetSkeleton() && Walk->GetSkeleton() == Mesh->GetSkeleton())
+    {
+        for (USkeletalMeshComponent* Source : {IdleSource.Get(), WalkSource.Get()})
+        {
+            Source->SetSkeletalMeshAsset(Mesh);
+            Source->SetComponentTickEnabled(false);
+            Source->PlayAnimation(Source == IdleSource ? Idle : Walk, true);
+        }
+        bAuthoredMotion = true;
+        UE_LOG(LogTemp, Display, TEXT("Aura: authored idle and walk clips ready"));
+    }
+    else UE_LOG(LogTemp, Warning, TEXT("Aura: compatible idle/walk clips missing; using procedural fallback. Run prepare."));
     UE_LOG(LogTemp, Display, TEXT("Aura: rig ready, %d bones, %s"), BoneCount, *Mesh->GetName());
     UpdatePose(0);
 }
@@ -99,6 +126,20 @@ FVector2D AAuraRigActor::GetEyeGazeDegrees() const
 
 void AAuraRigActor::UpdatePose(float DeltaSeconds)
 {
+    if (bAuthoredMotion)
+    {
+        for (USkeletalMeshComponent* Source : {IdleSource.Get(), WalkSource.Get()})
+        {
+            // Evaluate synchronously only when this driver advances, with no
+            // independent component ticks or animation time changes during pause.
+            Source->TickAnimation(DeltaSeconds, false);
+            Source->RefreshBoneTransforms(nullptr);
+        }
+    }
+    const TArrayView<const FTransform> IdlePose = IdleSource->GetBoneSpaceTransformsView();
+    const TArrayView<const FTransform> WalkPose = WalkSource->GetBoneSpaceTransformsView();
+    const bool UseAuthored = bAuthoredMotion && IdlePose.Num() == BoneCount && WalkPose.Num() == BoneCount;
+    bAuthoredPoseApplied = UseAuthored;
     WalkWeight = FMath::FInterpTo(WalkWeight, Behavior->bMoving ? 1.f : 0.f, DeltaSeconds, 7);
     WaveWeight = FMath::FInterpTo(WaveWeight, Behavior->Gesture == TEXT("wave") ? 1.f : 0.f, DeltaSeconds, 7);
     const bool Nodding = Behavior->Gesture == TEXT("nod");
@@ -118,32 +159,38 @@ void AAuraRigActor::UpdatePose(float DeltaSeconds)
     {
         const FName Name = BoneNames[Index];
         FTransform Local = ReferenceLocal[Index];
-        if (Name == TEXT("pelvis"))
+        if (UseAuthored)
+        {
+            Local.Blend(IdlePose[Index], WalkPose[Index], WalkWeight);
+            // Movement remains owned by the semantic receiver, never clip root motion.
+            if (Parents[Index] == INDEX_NONE) Local = ReferenceLocal[Index];
+        }
+        if (!UseAuthored && Name == TEXT("pelvis"))
             Local.AddToTranslation(FVector(0, 0, .5f * Breath + 1.2f * FMath::Abs(Stride)));
         Pose[Index] = Parents[Index] == INDEX_NONE ? Local : Local * Pose[Parents[Index]];
         FQuat Offset = FQuat::Identity;
         auto Rotate = [&Offset](FVector Axis, float Degrees)
         { Offset = FQuat(Axis, FMath::DegreesToRadians(Degrees)) * Offset; };
         // Mannequin mesh faces +Y before its -90-degree component rotation.
-        if (Name == TEXT("spine_01")) Rotate(FVector::XAxisVector, 4.f * AttentiveWeight + Breath * .7f);
+        if (Name == TEXT("spine_01")) Rotate(FVector::XAxisVector, 4.f * AttentiveWeight + (UseAuthored ? 0.f : Breath * .7f));
         if (Name == TEXT("head"))
         {
             Rotate(FVector::ZAxisVector, GazeYaw);
             Rotate(FVector::XAxisVector, GazePitch + FMath::Sin(NodTime * 8) * 10 * NodWeight);
         }
-        if (Name == TEXT("thigh_l")) Rotate(FVector::XAxisVector, Stride * 22);
-        if (Name == TEXT("thigh_r")) Rotate(FVector::XAxisVector, -Stride * 22);
-        if (Name == TEXT("calf_l")) Rotate(FVector::XAxisVector, -FMath::Max(0.f, Stride) * 28);
-        if (Name == TEXT("calf_r")) Rotate(FVector::XAxisVector, -FMath::Max(0.f, -Stride) * 28);
+        if (!UseAuthored && Name == TEXT("thigh_l")) Rotate(FVector::XAxisVector, Stride * 22);
+        if (!UseAuthored && Name == TEXT("thigh_r")) Rotate(FVector::XAxisVector, -Stride * 22);
+        if (!UseAuthored && Name == TEXT("calf_l")) Rotate(FVector::XAxisVector, -FMath::Max(0.f, Stride) * 28);
+        if (!UseAuthored && Name == TEXT("calf_r")) Rotate(FVector::XAxisVector, -FMath::Max(0.f, -Stride) * 28);
         if (Name == TEXT("upperarm_l"))
         {
-            Rotate(FVector::YAxisVector, 35);
-            Rotate(FVector::XAxisVector, -Stride * 12);
+            if (!UseAuthored) Rotate(FVector::YAxisVector, 35);
+            if (!UseAuthored) Rotate(FVector::XAxisVector, -Stride * 12);
         }
         if (Name == TEXT("upperarm_r"))
         {
-            Rotate(FVector::YAxisVector, -35 + 110 * WaveWeight);
-            Rotate(FVector::XAxisVector, Stride * 12 * (1 - WaveWeight));
+            Rotate(FVector::YAxisVector, (UseAuthored ? 0 : -35) + 110 * WaveWeight);
+            if (!UseAuthored) Rotate(FVector::XAxisVector, Stride * 12 * (1 - WaveWeight));
         }
         if (Name == TEXT("lowerarm_r")) Rotate(FVector::YAxisVector, 35 * WaveWeight);
         if (Name == TEXT("hand_r")) Rotate(FVector::YAxisVector, FMath::Sin(MotionTime * 10) * 18 * WaveWeight);
@@ -182,6 +229,13 @@ void AAuraRigActor::RecordSample(float DeltaSeconds)
     Data->SetNumberField(TEXT("frame_interval_worst_ms"), FrameIntervalWorst * 1000);
     Data->SetNumberField(TEXT("frames_over_50ms"), FramesOver50Ms);
     Data->SetBoolField(TEXT("rig_ready"), bRigReady);
+    Data->SetBoolField(TEXT("authored_motion"), bAuthoredMotion);
+    Data->SetBoolField(TEXT("authored_pose_applied"), bAuthoredPoseApplied);
+    if (bAuthoredMotion)
+    {
+        Data->SetNumberField(TEXT("idle_clip_time"), IdleSource->GetPosition());
+        Data->SetNumberField(TEXT("walk_clip_time"), WalkSource->GetPosition());
+    }
     Data->SetNumberField(TEXT("bones"), BoneCount);
     Data->SetBoolField(TEXT("connected"), Behavior->bConnected);
     Data->SetBoolField(TEXT("paused"), Behavior->bPaused);

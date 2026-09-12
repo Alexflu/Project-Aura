@@ -59,6 +59,13 @@ def main():
         time.sleep(1.5)
         samples = read_samples(telemetry)
         assert all(s["rig_ready"] and s["bones"] > 20 for s in samples)
+        assert all(s["authored_motion"] for s in samples), "Authored clips did not load; fallback is not a pass"
+        assert all(s["authored_pose_applied"] for s in samples), "Authored pose was not applied"
+        # Timeline starts after stage startup; select pause by state rather than its wall time.
+        paused = [s for s in samples if s["paused"] and s["connected"]]
+        assert len(paused) >= 3
+        for key in ("idle_clip_time", "walk_clip_time", "left_foot_z", "right_hand_z"):
+            assert max(s[key] for s in paused) - min(s[key] for s in paused) < .01, f"Paused authored motion advanced: {key}"
         assert {s["mode"] for s in samples} >= {"idle", "listening", "speaking"}
         assert any(s["wave_weight"] > .7 for s in samples), "No skeletal wave response"
         assert max(s["right_hand_z"] for s in samples) - min(s["right_hand_z"] for s in samples) > 30, "Wrist bone did not move"
@@ -85,7 +92,7 @@ def main():
         ms = [s["frame_ms"] for s in samples if s["elapsed_s"] > 3]
         report = {"result": "passed", "samples": len(samples), "bones": samples[-1]["bones"],
                   "sampled_mean_frame_ms": statistics.mean(ms), "sampled_worst_frame_ms": max(ms),
-                  "checks": ["skeletal_mesh", "static_leftover", "six_cue_channels", "producer_restart",
+                  "checks": ["skeletal_mesh", "authored_pose_application", "authored_pause_hold", "static_leftover", "six_cue_channels", "producer_restart",
                              "stale_disconnect", "malformed_input_stop"],
                   "limits": "Sampled frame times; offline cues; mannequin has no facial rig or audio."}
         if args.metahuman:

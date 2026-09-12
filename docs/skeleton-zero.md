@@ -31,9 +31,19 @@ Epic template assets without overwriting differing files and records their sourc
 and hashes in `Saved/Aura/asset-manifest.json`. Those assets are ignored by Git;
 they are not relicensed as MIT. Install them locally on each development machine.
 
-The mannequin uses an actual skinned skeletal mesh with procedural idle, gaze,
-walking and a wave/nod. These are prototype poses, not motion-captured performance,
-navigation, foot-contact IK or production animation blending. Listening changes
+The mannequin uses an actual skinned skeletal mesh. Compatible local Epic clips
+`MM_Idle` and `MF_Unarmed_Walk_Fwd` now supply idle and forward walking poses,
+blended with the existing walking weight. Two hidden source meshes evaluate only
+when the driver advances, so pause/disconnect freezes their animation clocks too.
+Gaze, attentive posture and wave/nod are layered procedurally onto that base.
+Missing or incompatible clips retain the procedural fallback with a log warning;
+the runtime smoke requires actual authored pose application and rejects fallback.
+`prepare` copies these template assets and records their hashes with the other
+locally licensed content. They are not committed to Git or relicensed as MIT.
+
+This remains prototype retargeting without foot-contact IK, stride/speed matching,
+navigation or a production animation state machine. Clip root motion is discarded;
+semantic commands alone move the actor. Listening changes
 the attentive pose and HUD. The synthetic speech signal is a HUD meter because
 this mannequin has no facial rig. Expression/blush are also diagnostic signals;
 MetaHuman face/material bindings remain open. Pause/disconnect hold position and
@@ -322,7 +332,7 @@ The playback-position update passed 107 tests and a second Unreal speech run
 also verified advancing position, explicit stop, reopening and natural completion.
 
 - Replace approximate audio-envelope jaw movement with phoneme-shaped facial animation.
-- Replace procedural poses with authored animation and foot-contact IK.
+- Tune authored locomotion with foot-contact IK and stride/speed matching; replace procedural gestures.
 - Record hardware, resolution, average and worst frame times over a one-minute run.
   Initial target: 60 fps on the test machine; this is a target, not a measured result.
 

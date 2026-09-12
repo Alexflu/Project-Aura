@@ -17,6 +17,8 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 and a compiled Unreal stage with a real skeletal mannequin and optional assembled
 MetaHuman. After the documented local setup, open `Launch Skeleton Zero.cmd`, or
 `Launch Aura MetaHuman Demo.cmd` for body movement and synthetic jaw animation.
+The body now blends locally installed Epic idle/walk animation clips with Aura's
+procedural gaze and gestures; foot planting and stride matching remain open.
 Audio lip sync and live conversation remain open. Follow the [3D roadmap](docs/roadmap.md) and
 [behavior protocol](docs/behavior-protocol.md). The downloadable beta below is 2D.
 The separate `tools/unreal_speech.py --text "Hello"` prototype adds local Windows
