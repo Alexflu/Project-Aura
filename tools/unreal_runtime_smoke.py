@@ -28,6 +28,8 @@ def main():
     parser.add_argument("--engine-root", type=Path, required=True)
     parser.add_argument("--metahuman", action="store_true")
     parser.add_argument("--rebuild-retarget-cache", action="store_true", help="Development comparison: rebuild skeleton mappings every frame")
+    parser.add_argument("--performance-seconds", type=int, default=0, choices=range(0, 61), metavar="0..60",
+                        help="Additional connected idle measurement after behavior checks")
     args = parser.parse_args()
     folder = PROJECT.parent / "Saved/Aura/Smoke" / uuid.uuid4().hex[:10]
     folder.mkdir(parents=True)
@@ -160,6 +162,26 @@ def main():
             report["metahuman_jaw_range_degrees"] = jaw_range
             report["checks"] += ["metahuman_jaw_bone", "metahuman_wrist", "metahuman_movement", "metahuman_disconnect"]
             report["limits"] = "Sampled frame times; synthetic facial controls, no audio or live AI; prototype retargeting."
+        if args.performance_seconds:
+            controller = BehaviorController()
+            deadline = time.monotonic() + args.performance_seconds
+            while time.monotonic() < deadline:
+                if process.poll() is not None:
+                    raise RuntimeError("Unreal exited during performance measurement")
+                write_snapshot(snapshot, controller.snapshot())
+                controller.tick(1 / 30)
+                time.sleep(1 / 30)
+        final = read_samples(telemetry)[-1]
+        count = final["measured_frames"]
+        assert count > len(samples), "Every-frame interval counter did not advance"
+        report["frame_intervals"] = {
+            "frames": count, "duration_s": final["frame_interval_total_s"],
+            "mean_ms": final["frame_interval_total_s"] * 1000 / count,
+            "worst_ms": final["frame_interval_worst_ms"],
+            "over_50ms": final["frames_over_50ms"],
+            "scope": "Every game-thread tick interval after 3s warmup, including behavior checks and optional idle; not GPU/present timing"}
+        if args.performance_seconds == 60:
+            assert report["frame_intervals"]["duration_s"] >= 60, "One-minute measurement incomplete"
         (folder / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(json.dumps(report, indent=2))
         print(f"Evidence: {folder}")

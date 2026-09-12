@@ -41,6 +41,11 @@ private:
     bool bTelemetry = false;
     double StartedAt = 0;
     double LastSample = 0;
+    double LastFrameAt = 0;
+    double FrameIntervalTotal = 0;
+    double FrameIntervalWorst = 0;
+    int32 MeasuredFrames = 0;
+    int32 FramesOver50Ms = 0;
     FString TelemetryPath;
     void RecordSample(float DeltaSeconds);
 };

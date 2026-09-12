@@ -52,6 +52,20 @@ saved under `Saved/Aura/Smoke/`. `-AuraDataDir` is a startup option for isolated
 tests; semantic commands cannot choose files. `-AuraTelemetry` enables at most two
 minutes of development telemetry at 10 Hz, without screenshots or private data.
 
+For a longer performance check, append `--performance-seconds 60` to the smoke
+command. It keeps a connected idle character running for an additional minute
+after the behavior checks. `frame_intervals` in the report counts every actual
+game-thread tick interval after a three-second warmup: duration, mean, worst and
+number over 50 ms. Counters update every frame but are still written at 10 Hz.
+This avoids missing intervening hitches or reporting Unreal's clamped tick delta
+as the actual delay. It measures neither GPU duration nor display presentation,
+and the scope includes the behavior sequence plus the additional idle period.
+The first extended MetaHuman check passed with 5,662 measured intervals over
+94.38 seconds: 16.669 ms mean, 34.507 ms worst, and none over 50 ms. The old sampled
+counter's worst was only 16.706 ms, demonstrating why it was insufficient for
+hitch detection. The earlier large hitch did not reproduce; its cause remains
+unresolved. Evidence: `Saved/Aura/Smoke/e1c6445e4b/report.json` on the hardware below.
+
 The following manual route is still useful when replacing the native mannequin
 with a custom Animation Blueprint or MetaHuman.
 
