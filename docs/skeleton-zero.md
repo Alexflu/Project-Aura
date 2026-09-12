@@ -256,9 +256,14 @@ for this command-line prototype. Text is limited to 1,000 characters and each
 playback session to 110 seconds including synthesis. Temporary audio is cleaned up.
 No text, paths or device commands have been added to the semantic protocol.
 
-This is volume-driven jaw movement timed from the local playback start, not
-phoneme-shaped lip sync or an audio-device sample clock. Device buffering can
-introduce an offset. There is no microphone, live Realtime conversation, or
+This is volume-driven jaw movement using the Windows WAV player's reported
+position in milliseconds, not phoneme-shaped lip sync or a hardware sample clock.
+Polling and rendering latency can still introduce an offset. The local MetaHuman
+route uses a dedicated MCI WAV player; the existing 2D speech player is unchanged.
+Microsoft documents position and time formats in its
+[MCI status reference](https://learn.microsoft.com/en-us/windows/win32/multimedia/status).
+MCI is a legacy backend suitable for this bounded WAV prototype; a future streaming
+conversation needs a streaming audio backend. There is no microphone, live Realtime conversation, or
 automatic speech triggered by the existing silent demo. Force-killing the helper
 can bypass its cleanup; ordinary interruption and renderer loss use explicit stop.
 
@@ -266,6 +271,9 @@ The first local Windows speech run completed with 97 MetaHuman telemetry samples
 a 22.81-degree jaw range, and zero mouth/jaw values at completion. The Unreal build
 and 105 Python tests passed, including playback-envelope silence, pause and error
 cleanup. This does not measure acoustic output latency or phoneme accuracy.
+The playback-position update passed 107 tests and a second Unreal speech run
+(86 samples, 22.81-degree jaw range, ending at zero). A real Windows player check
+also verified advancing position, explicit stop, reopening and natural completion.
 
 - Replace approximate audio-envelope jaw movement with phoneme-shaped facial animation.
 - Replace procedural poses with authored animation and foot-contact IK.

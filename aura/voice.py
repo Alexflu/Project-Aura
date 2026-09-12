@@ -89,9 +89,10 @@ try {
 
 
 class Speech:
-    def __init__(self, clock=time.monotonic, player=None):
+    def __init__(self, clock=time.monotonic, player=None, playback_position=None):
         self.clock = clock
         self.player = player
+        self.playback_position = playback_position
         self.temp = None
         self.process = None
         self.clip = None
@@ -183,7 +184,16 @@ class Speech:
                 self.stop()
                 raise
         if self.state == "playing":
-            elapsed = self.clock() - self.started
+            try:
+                elapsed = self.playback_position() if self.playback_position else self.clock() - self.started
+                if elapsed is None:
+                    self.stop()
+                    return 0
+                if not math.isfinite(elapsed) or elapsed < 0:
+                    raise ValueError("Invalid playback position")
+            except Exception:
+                self.stop()
+                raise
             if elapsed >= self.clip.duration + max(0, self.delay_ms / 1000):
                 self.stop()
                 return 0

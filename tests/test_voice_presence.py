@@ -74,6 +74,32 @@ class AudioTests(unittest.TestCase):
                 speech.speak(text)
         self.assertIsNone(speech.process)
 
+    def test_player_position_overrides_elapsed_wall_time(self):
+        position = [.1]
+        now = [0]
+        calls = []
+        speech = Speech(clock=lambda: now[0], player=calls.append,
+                        playback_position=lambda: position[0])
+        self.addCleanup(speech.stop)
+        speech.load(self.path)
+        now[0] = 100  # A delayed poll must follow playback, not the wall clock.
+        self.assertEqual(speech.poll(), 0)
+        self.assertEqual(speech.state, "playing")
+        position[0] = .3
+        self.assertGreater(speech.poll(), .5)
+        position[0] = None
+        self.assertEqual(speech.poll(), 0)
+        self.assertEqual(speech.state, "idle")
+        self.assertIsNone(calls[-1])
+
+    def test_invalid_player_position_stops_audio(self):
+        speech = Speech(player=lambda path: None, playback_position=lambda: float("nan"))
+        speech.load(self.path)
+        with self.assertRaises(ValueError):
+            speech.poll()
+        self.assertEqual(speech.state, "idle")
+        self.assertIsNone(speech.temp)
+
     def test_playback_failure_cleans_temp(self):
         def fail(path):
             raise RuntimeError("device failed")
