@@ -14,7 +14,10 @@ Target path: optional Realtime and consented local perception -> AuraBridge ->
 AuraCore policy/behavior state -> Unreal body. Desktop actions continue through
 approved adapters. The renderer never gains computer permissions from a gesture.
 The current demo connects only the offline controller to a local snapshot file;
-Realtime, perception, product Pause integration and desktop embedding remain open.
+Realtime, perception and integration with the older product remain open. The
+local Unreal desktop prototype adds a per-pixel-alpha Windows overlay and a small
+speech/pause control panel; it does not yet connect desktop coordinates or app
+interaction to the semantic controller. See [Skeleton Zero](skeleton-zero.md).
 
 The optional `UAuraMetaHuman` adapter spawns the locally assembled Ada prototype,
 uses hidden Quinn poses to drive common body bones, and passes synthetic jaw and

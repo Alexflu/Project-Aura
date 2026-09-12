@@ -24,6 +24,12 @@ Audio lip sync and live conversation remain open. Follow the [3D roadmap](docs/r
 The separate `tools/unreal_speech.py --text "Hello"` prototype adds local Windows
 speech with volume-driven jaw motion; it does not yet produce phoneme lip sync.
 
+**3D desktop presence is now available as a local prototype:** after the Unreal
+setup, open **Launch Aura Desktop.cmd**. Aura appears in a transparent, always-on-top
+overlay. Drag the character to move her; use the control panel for local speech,
+pause and close. Right-clicking Aura also closes the session. This still uses the
+temporary MetaHuman appearance and requires the local Unreal installation.
+
 The beta includes a floating illustrated avatar, appearance customization, local speech and audio-driven mouth movement, equipment slots, visual spells, an optional narrated entrance/tutorial and a local MCP bridge. The entrance runs inside the program using the same renderer as the demo video.
 
 Extract the **entire** Windows ZIP and open `ProjectAura.exe`. Keep `_internal`, `bridge`, `docs` and `examples` in place. Close older Aura versions before opening the new build. Existing preferences remain in your Windows profile. Starting with beta 4, opening the packaged app checks for a newer official release and switches to it after verification. No Windows startup task or background checker is installed. See [Updates](docs/updates.md) for offline use and disabling checks. The title bar shows the running version.
