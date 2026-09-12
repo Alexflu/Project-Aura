@@ -101,12 +101,19 @@ void AAuraRigActor::UpdatePose(float DeltaSeconds)
 {
     WalkWeight = FMath::FInterpTo(WalkWeight, Behavior->bMoving ? 1.f : 0.f, DeltaSeconds, 7);
     WaveWeight = FMath::FInterpTo(WaveWeight, Behavior->Gesture == TEXT("wave") ? 1.f : 0.f, DeltaSeconds, 7);
+    const bool Nodding = Behavior->Gesture == TEXT("nod");
+    if (Nodding && !bWasNodding && NodWeight < .01f) NodTime = 0;
+    // Keep a fading nod's phase if it is retriggered, avoiding a restart snap.
+    if (Nodding || NodWeight > .001f) NodTime += FMath::Min(DeltaSeconds, .1f);
+    NodWeight = FMath::FInterpTo(NodWeight, Nodding ? 1.f : 0.f, DeltaSeconds, 7);
+    bWasNodding = Nodding;
+    const bool Attentive = Behavior->Posture == TEXT("attentive") || Behavior->Mode == TEXT("listening");
+    AttentiveWeight = FMath::FInterpTo(AttentiveWeight, Attentive ? 1.f : 0.f, DeltaSeconds, 5);
     const FVector Look = GetActorTransform().InverseTransformPosition(StageOrigin + Behavior->GazeTargetCm) - FVector(0, 0, 160);
     GazeYaw = FMath::FInterpTo(GazeYaw, FMath::Clamp(static_cast<float>(FMath::RadiansToDegrees(FMath::Atan2(Look.Y, Look.X))), -55.f, 55.f), DeltaSeconds, 4);
     GazePitch = FMath::FInterpTo(GazePitch, FMath::Clamp(static_cast<float>(FMath::RadiansToDegrees(FMath::Atan2(Look.Z, Look.Size2D()))), -20.f, 25.f), DeltaSeconds, 4);
     const float Stride = FMath::Sin(MotionTime * 6) * WalkWeight;
     const float Breath = FMath::Sin(MotionTime * 1.8f);
-    const bool Attentive = Behavior->Posture == TEXT("attentive") || Behavior->Mode == TEXT("listening");
     for (int32 Index = 0; Index < BoneCount; ++Index)
     {
         const FName Name = BoneNames[Index];
@@ -118,11 +125,11 @@ void AAuraRigActor::UpdatePose(float DeltaSeconds)
         auto Rotate = [&Offset](FVector Axis, float Degrees)
         { Offset = FQuat(Axis, FMath::DegreesToRadians(Degrees)) * Offset; };
         // Mannequin mesh faces +Y before its -90-degree component rotation.
-        if (Name == TEXT("spine_01")) Rotate(FVector::XAxisVector, (Attentive ? 4.f : 0.f) + Breath * .7f);
+        if (Name == TEXT("spine_01")) Rotate(FVector::XAxisVector, 4.f * AttentiveWeight + Breath * .7f);
         if (Name == TEXT("head"))
         {
             Rotate(FVector::ZAxisVector, GazeYaw);
-            Rotate(FVector::XAxisVector, GazePitch + (Behavior->Gesture == TEXT("nod") ? FMath::Sin(MotionTime * 8) * 10 : 0));
+            Rotate(FVector::XAxisVector, GazePitch + FMath::Sin(NodTime * 8) * 10 * NodWeight);
         }
         if (Name == TEXT("thigh_l")) Rotate(FVector::XAxisVector, Stride * 22);
         if (Name == TEXT("thigh_r")) Rotate(FVector::XAxisVector, -Stride * 22);
@@ -186,9 +193,14 @@ void AAuraRigActor::RecordSample(float DeltaSeconds)
     Data->SetNumberField(TEXT("y"), GetActorLocation().Y);
     Data->SetNumberField(TEXT("head_yaw"), GazeYaw);
     Data->SetNumberField(TEXT("wave_weight"), WaveWeight);
+    Data->SetNumberField(TEXT("nod_weight"), NodWeight);
+    Data->SetNumberField(TEXT("attentive_weight"), AttentiveWeight);
     Data->SetNumberField(TEXT("walk_weight"), WalkWeight);
     if (bRigReady)
     {
+        const int32 Head = Body->GetBoneIndex(TEXT("head"));
+        Data->SetNumberField(TEXT("head_local_rotation_degrees"), FMath::RadiansToDegrees(
+            Body->BoneSpaceTransforms[Head].GetRotation().AngularDistance(ReferenceLocal[Head].GetRotation())));
         Data->SetNumberField(TEXT("right_hand_z"), Body->GetBoneLocationByName(TEXT("hand_r"), EBoneSpaces::WorldSpace).Z);
         Data->SetNumberField(TEXT("left_foot_z"), Body->GetBoneLocationByName(TEXT("foot_l"), EBoneSpaces::WorldSpace).Z);
         Data->SetNumberField(TEXT("pelvis_z"), Body->GetBoneLocationByName(TEXT("pelvis"), EBoneSpaces::WorldSpace).Z);

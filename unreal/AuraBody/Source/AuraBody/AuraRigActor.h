@@ -31,6 +31,10 @@ private:
     float MotionTime = 0;
     float WalkWeight = 0;
     float WaveWeight = 0;
+    float NodWeight = 0;
+    float NodTime = 0;
+    float AttentiveWeight = 0;
+    bool bWasNodding = false;
     float GazeYaw = 0;
     float GazePitch = 0;
     TArray<FTransform> ReferenceLocal;

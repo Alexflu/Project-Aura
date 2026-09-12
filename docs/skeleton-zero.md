@@ -39,6 +39,13 @@ this mannequin has no facial rig. Expression/blush are also diagnostic signals;
 MetaHuman face/material bindings remain open. Pause/disconnect hold position and
 freeze skeletal motion. There is no transparent desktop window yet.
 
+Nods now use a gesture-local phase and a blended weight instead of entering the
+global idle cycle mid-motion. Expiry fades the nod; retriggering during its fade
+preserves phase to avoid a restart snap. Attentive/listening posture also blends
+in and out. Pause/input loss still freezes the current body pose. Runtime checks
+cover actual head articulation, nod recovery and intermediate posture weights;
+these remain procedural motions rather than authored performance animation.
+
 Run the real-engine smoke test with the stage closed:
 
 ```powershell
