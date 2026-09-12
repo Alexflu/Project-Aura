@@ -17,6 +17,8 @@ public:
     UPROPERTY(Transient) TObjectPtr<USkinnedMeshComponent> PoseSource;
     UPROPERTY(Transient) TObjectPtr<UAuraBehaviorComponent> Behavior;
     bool bFace = false;
+    double PoseUpdateUs = 0;
+    int32 RetargetCacheBuilds = 0;
 protected:
     virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
     virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* Proxy) override;

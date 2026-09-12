@@ -196,6 +196,22 @@ body and retains its assembled post-process RigLogic. Inputs are copied on the
 game thread before worker evaluation; explicit tick prerequisites order driver,
 body and face. No asset path is accepted through semantic commands.
 
+Reference poses, parent indices and source/target bone mappings are cached per
+animation proxy. A different mesh or bone count rebuilds the cache; ordinary
+frames reuse it and the component-pose buffer. Reinitialize the animation instance
+after editing a reference skeleton in place. Runtime asset editing is not supported.
+The smoke test checks one cache build per body/face instance. Add
+`--rebuild-retarget-cache` to that test for a development comparison that rebuilds
+the same mappings every frame. `body_pose_us` and `face_pose_us` measure the
+game-thread proxy update only, excluding worker evaluation, RigLogic and rendering.
+
+On the development host, two sequential full runtime checks passed with these
+sampled warm means: cached body/face 27.95/49.72 microseconds, forced rebuild
+51.38/102.65 microseconds. Combined measured proxy work fell from 154.03 to 77.66
+microseconds. This is a narrow CPU measurement, not a comparable reduction in
+whole-frame time or proof that intermittent frame hitches are resolved. Evidence:
+`Saved/Aura/Smoke/1dd972d631` (cached) and `7c34f8547d` (forced rebuild).
+
 The synthetic mouth signal drives `CTRL_expressions_jawOpen`. `happy` blends
 mouth-corner pull with cheek raise; `curious` raises the brows asymmetrically;
 `concerned` blends inner-brow raise, brow lowering and mouth-corner depression.

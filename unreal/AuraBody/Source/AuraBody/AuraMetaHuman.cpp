@@ -20,8 +20,19 @@ namespace
 class FAuraMetaHumanProxy : public FAnimInstanceProxy
 {
 public:
-    FAuraMetaHumanProxy(UAnimInstance* Instance) : FAnimInstanceProxy(Instance) {}
+    FAuraMetaHumanProxy(UAnimInstance* Instance) : FAnimInstanceProxy(Instance),
+        bRebuildEveryFrame(FParse::Param(FCommandLine::Get(), TEXT("AuraRebuildRetargetCache"))) {}
     TArray<FTransform> LocalPose;
+    TWeakObjectPtr<const USkeletalMesh> CachedSource;
+    TWeakObjectPtr<const USkeletalMesh> CachedTarget;
+    TArray<FTransform> SourceReference;
+    TArray<FTransform> TargetReference;
+    TArray<FTransform> TargetLocal;
+    TArray<FTransform> ComponentPose;
+    TArray<int32> SourceIndices;
+    TArray<int32> ParentIndices;
+    int32 PelvisIndex = INDEX_NONE;
+    bool bRebuildEveryFrame = false;
     float Jaw = 0;
     float Smile = 0;
     float Curious = 0;
@@ -34,7 +45,8 @@ public:
     virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
     {
         FAnimInstanceProxy::PreUpdate(Instance, DeltaSeconds);
-        const UAuraMetaHumanAnim* Anim = CastChecked<UAuraMetaHumanAnim>(Instance);
+        const double UpdateStarted = FPlatformTime::Seconds();
+        UAuraMetaHumanAnim* Anim = CastChecked<UAuraMetaHumanAnim>(Instance);
         bFace = Anim->bFace;
         const auto* State = Anim->Behavior.Get();
         const bool Active = State && State->bConnected && !State->bPaused;
@@ -61,33 +73,48 @@ public:
         const FReferenceSkeleton& TargetRef = TargetMesh->GetRefSkeleton();
         const FReferenceSkeleton& SourceRef = SourceMesh->GetRefSkeleton();
         const TArray<FTransform>& SourcePose = Source->GetComponentSpaceTransforms();
-        TArray<FTransform> SourceReference = SourceRef.GetRefBonePose();
-        for (int32 I = 0; I < SourceReference.Num(); ++I)
+        if (bRebuildEveryFrame || CachedSource.Get() != SourceMesh || CachedTarget.Get() != TargetMesh ||
+            SourceReference.Num() != SourceRef.GetNum() || TargetLocal.Num() != TargetRef.GetNum())
         {
-            const int32 Parent = SourceRef.GetParentIndex(I);
-            if (Parent != INDEX_NONE) SourceReference[I] *= SourceReference[Parent];
+            CachedSource = SourceMesh;
+            CachedTarget = TargetMesh;
+            SourceReference = SourceRef.GetRefBonePose();
+            for (int32 I = 0; I < SourceReference.Num(); ++I)
+            {
+                const int32 Parent = SourceRef.GetParentIndex(I);
+                if (Parent != INDEX_NONE) SourceReference[I] *= SourceReference[Parent];
+            }
+            TargetLocal = TargetRef.GetRefBonePose();
+            TargetReference = TargetLocal;
+            ParentIndices.SetNum(TargetLocal.Num());
+            SourceIndices.SetNum(TargetLocal.Num());
+            ComponentPose.SetNum(TargetLocal.Num());
+            PelvisIndex = TargetRef.FindBoneIndex(TEXT("pelvis"));
+            for (int32 I = 0; I < TargetLocal.Num(); ++I)
+            {
+                ParentIndices[I] = TargetRef.GetParentIndex(I);
+                SourceIndices[I] = SourceRef.FindBoneIndex(TargetRef.GetBoneName(I));
+                if (ParentIndices[I] != INDEX_NONE) TargetReference[I] *= TargetReference[ParentIndices[I]];
+            }
+            ++Anim->RetargetCacheBuilds;
         }
-        LocalPose = TargetRef.GetRefBonePose();
-        TArray<FTransform> TargetReference = LocalPose;
-        TArray<FTransform> ComponentPose;
-        ComponentPose.SetNum(LocalPose.Num());
+        LocalPose = TargetLocal;
         for (int32 I = 0; I < LocalPose.Num(); ++I)
         {
-            const int32 Parent = TargetRef.GetParentIndex(I);
-            if (Parent != INDEX_NONE) TargetReference[I] *= TargetReference[Parent];
+            const int32 Parent = ParentIndices[I];
             ComponentPose[I] = Parent == INDEX_NONE ? LocalPose[I] : LocalPose[I] * ComponentPose[Parent];
-            const FName Name = TargetRef.GetBoneName(I);
-            const int32 SourceIndex = SourceRef.FindBoneIndex(Name);
+            const int32 SourceIndex = SourceIndices[I];
             if (SourcePose.IsValidIndex(SourceIndex) && SourceReference.IsValidIndex(SourceIndex))
             {
                 // Retarget rotation deltas, preserving this character's proportions.
                 const FQuat Delta = SourcePose[SourceIndex].GetRotation() * SourceReference[SourceIndex].GetRotation().Inverse();
                 ComponentPose[I].SetRotation((Delta * TargetReference[I].GetRotation()).GetNormalized());
-                if (Name == TEXT("pelvis"))
+                if (I == PelvisIndex)
                     ComponentPose[I].AddToTranslation(SourcePose[SourceIndex].GetTranslation() - SourceReference[SourceIndex].GetTranslation());
             }
             LocalPose[I] = Parent == INDEX_NONE ? ComponentPose[I] : ComponentPose[I].GetRelativeTransform(ComponentPose[Parent]);
         }
+        Anim->PoseUpdateUs = (FPlatformTime::Seconds() - UpdateStarted) * 1000000;
     }
 
     virtual bool Evaluate(FPoseContext& Output) override
@@ -204,6 +231,12 @@ void UAuraMetaHuman::TickComponent(float Dt, ELevelTick TickType, FActorComponen
     Data->SetBoolField(TEXT("paused"), Driver->Behavior->bPaused);
     Data->SetNumberField(TEXT("mouth"), Driver->Behavior->MouthOpen);
     Data->SetNumberField(TEXT("jaw_curve"), Face->GetAnimInstance()->GetCurveValue(TEXT("CTRL_expressions_jawOpen")));
+    for (USkeletalMeshComponent* Mesh : {Body.Get(), Face.Get()})
+    {
+        const UAuraMetaHumanAnim* Anim = CastChecked<UAuraMetaHumanAnim>(Mesh->GetAnimInstance());
+        Data->SetNumberField(Mesh == Body ? TEXT("body_pose_us") : TEXT("face_pose_us"), Anim->PoseUpdateUs);
+        Data->SetNumberField(Mesh == Body ? TEXT("body_cache_builds") : TEXT("face_cache_builds"), Anim->RetargetCacheBuilds);
+    }
     for (const TCHAR* Bone : {TEXT("FACIAL_L_Eye"), TEXT("FACIAL_R_Eye")})
     {
         const FQuat Rotation = Face->GetSocketTransform(FName(Bone), RTS_ParentBoneSpace).GetRotation();
