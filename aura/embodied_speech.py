@@ -5,7 +5,11 @@ from .voice import Speech
 
 class EmbodiedSpeech:
     def __init__(self, speech=None):
-        self.speech = speech if speech is not None else Speech()
+        if speech is None:
+            from .playback_clock import WavePlayer
+            player = WavePlayer()
+            speech = Speech(player=player, playback_position=player.position)
+        self.speech = speech
         self.behavior = BehaviorController()
 
     def speak(self, text):
