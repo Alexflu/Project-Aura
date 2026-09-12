@@ -28,6 +28,7 @@ public:
     float Concerned = 0;
     float Blink = 0;
     float BlinkTime = 0;
+    FVector2D EyeGaze = FVector2D::ZeroVector;
     bool bFace = false;
 
     virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
@@ -37,6 +38,11 @@ public:
         bFace = Anim->bFace;
         const auto* State = Anim->Behavior.Get();
         const bool Active = State && State->bConnected && !State->bPaused;
+        if (Active && bFace)
+        {
+            if (const AAuraRigActor* Driver = Cast<AAuraRigActor>(State->GetOwner()))
+                EyeGaze = FMath::Lerp(EyeGaze, Driver->GetEyeGazeDegrees(), 1.f - FMath::Exp(-14.f * DeltaSeconds));
+        }
         Jaw = Active ? State->MouthOpen : 0;
         // Blend expression changes; pause/input loss clears all facial activity.
         auto Blend = [Active, DeltaSeconds](float Current, float Target)
@@ -111,6 +117,15 @@ public:
             Output.Curve.Set(TEXT("CTRL_expressions_mouthCornerDepressR"), Concerned * .4f);
             Output.Curve.Set(TEXT("CTRL_expressions_eyeBlinkL"), Blink);
             Output.Curve.Set(TEXT("CTRL_expressions_eyeBlinkR"), Blink);
+            for (const TCHAR* Side : {TEXT("L"), TEXT("R")})
+            {
+                auto EyeCurve = [&Output, Side](const TCHAR* Direction, float Value)
+                { Output.Curve.Set(FName(*(FString(TEXT("CTRL_expressions_eyeLook")) + Direction + Side)), Value); };
+                EyeCurve(TEXT("Right"), FMath::Max(0.f, static_cast<float>(EyeGaze.X)) / 30.f);
+                EyeCurve(TEXT("Left"), FMath::Max(0.f, static_cast<float>(-EyeGaze.X)) / 30.f);
+                EyeCurve(TEXT("Up"), FMath::Max(0.f, static_cast<float>(EyeGaze.Y)) / 30.f);
+                EyeCurve(TEXT("Down"), FMath::Max(0.f, static_cast<float>(-EyeGaze.Y)) / 30.f);
+            }
         }
         return true;
     }
@@ -189,6 +204,13 @@ void UAuraMetaHuman::TickComponent(float Dt, ELevelTick TickType, FActorComponen
     Data->SetBoolField(TEXT("paused"), Driver->Behavior->bPaused);
     Data->SetNumberField(TEXT("mouth"), Driver->Behavior->MouthOpen);
     Data->SetNumberField(TEXT("jaw_curve"), Face->GetAnimInstance()->GetCurveValue(TEXT("CTRL_expressions_jawOpen")));
+    for (const TCHAR* Bone : {TEXT("FACIAL_L_Eye"), TEXT("FACIAL_R_Eye")})
+    {
+        const FQuat Rotation = Face->GetSocketTransform(FName(Bone), RTS_ParentBoneSpace).GetRotation();
+        TArray<TSharedPtr<FJsonValue>> Values;
+        for (double Value : {Rotation.X, Rotation.Y, Rotation.Z, Rotation.W}) Values.Add(MakeShared<FJsonValueNumber>(Value));
+        Data->SetArrayField(Bone, Values);
+    }
     for (const TCHAR* Curve : {TEXT("browRaiseOuterL"), TEXT("mouthCornerPullL"), TEXT("mouthCornerDepressL"), TEXT("eyeBlinkL")})
         Data->SetNumberField(Curve, Face->GetAnimInstance()->GetCurveValue(FName(*(FString(TEXT("CTRL_expressions_")) + Curve))));
     for (const TCHAR* Bone : {TEXT("FACIAL_L_LipCorner"), TEXT("FACIAL_L_EyelidUpperA")})

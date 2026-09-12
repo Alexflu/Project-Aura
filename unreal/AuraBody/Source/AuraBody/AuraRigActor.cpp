@@ -86,6 +86,17 @@ void AAuraRigActor::Tick(float DeltaSeconds)
     UpdatePose(DeltaSeconds);
 }
 
+FVector2D AAuraRigActor::GetEyeGazeDegrees() const
+{
+    const FVector Look = GetActorTransform().InverseTransformPosition(StageOrigin + Behavior->GazeTargetCm) - FVector(0, 0, 160);
+    if (Look.SizeSquared() < 1) return FVector2D::ZeroVector;
+    const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Look.Y, Look.X));
+    const float Pitch = FMath::RadiansToDegrees(FMath::Atan2(Look.Z, Look.Size2D()));
+    // Eyes lead the slower head, then settle as the head catches up.
+    return FVector2D(FMath::Clamp(FRotator::NormalizeAxis(Yaw - GazeYaw), -20.f, 20.f),
+        FMath::Clamp(Pitch - GazePitch, -12.f, 12.f));
+}
+
 void AAuraRigActor::UpdatePose(float DeltaSeconds)
 {
     WalkWeight = FMath::FInterpTo(WalkWeight, Behavior->bMoving ? 1.f : 0.f, DeltaSeconds, 7);

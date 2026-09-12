@@ -17,6 +17,7 @@ public:
     AAuraRigActor();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    FVector2D GetEyeGazeDegrees() const;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly) TObjectPtr<UAuraBehaviorComponent> Behavior;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly) TObjectPtr<UPoseableMeshComponent> Body;
