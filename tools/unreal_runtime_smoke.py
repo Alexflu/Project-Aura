@@ -27,6 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine-root", type=Path, required=True)
     parser.add_argument("--metahuman", action="store_true")
+    parser.add_argument("--rebuild-retarget-cache", action="store_true", help="Development comparison: rebuild skeleton mappings every frame")
     args = parser.parse_args()
     folder = PROJECT.parent / "Saved/Aura/Smoke" / uuid.uuid4().hex[:10]
     folder.mkdir(parents=True)
@@ -36,6 +37,8 @@ def main():
     controller.apply({"version": 1, "id": "stale-speech", "action": "speak", "params": {"duration_s": 10}})
     write_snapshot(snapshot, controller.snapshot())
     command = launch_command(args.engine_root, args.metahuman) + ["-Unattended", "-AuraTelemetry", f"-AuraDataDir={folder}"]
+    if args.rebuild_retarget_cache:
+        command.append("-AuraRebuildRetargetCache")
     process = subprocess.Popen(command, env=runtime_environment())
     try:
         deadline = time.monotonic() + 180
@@ -86,6 +89,13 @@ def main():
         if args.metahuman:
             meta = read_samples(folder / "metahuman-runtime.jsonl")
             assert meta, "MetaHuman adapter did not start; mannequin fallback is not a pass"
+            for key in ("body_cache_builds", "face_cache_builds"):
+                count = meta[-1][key]
+                expected = count > 10 if args.rebuild_retarget_cache else count == 1
+                assert expected, f"Unexpected {key}: {count}"
+            warm = [s for s in meta if s["elapsed_s"] > 3]
+            report["retarget_pose_mean_us"] = {part: statistics.mean(s[f"{part}_pose_us"] for s in warm) for part in ("body", "face")}
+            report["rebuild_retarget_cache"] = args.rebuild_retarget_cache
             assert max(s["jaw_curve"] for s in meta) > .5, "Face animation received no jaw curve"
             jaw_range = max(s["jaw_rotation_degrees"] for s in meta) - min(s["jaw_rotation_degrees"] for s in meta)
             assert jaw_range > 5, f"Facial jaw bone did not articulate: {jaw_range} degrees"
