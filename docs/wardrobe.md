@@ -4,12 +4,20 @@ The current local installation contains only MetaHuman's basic shirt and shorts.
 No tactical jacket, trousers or boots have been added yet. The runtime now accepts
 up to eight fitted skeletal garment parts without changing the animation adapter.
 
-## Selected starting outfit: Epic Techwear
+## Optional fitting reference: Epic Techwear (parked)
 
 [Epic's MetaHuman Techwear Outfit](https://www.fab.com/listings/9e04c752-1979-4723-b78f-6d24afc532bc)
 is a free parametric jacket, pants and shoes set with customizable materials. It
-resizes in MetaHuman Creator. This is the preferred next visible clothing step;
-the separate fitted-mesh loader below remains useful for later custom pieces.
+resizes in MetaHuman Creator. The user does not favor its appearance; it is only
+an optional fitting reference, not the approved wardrobe direction. Prefer
+separate customizable pieces matching the approved illustration.
+
+On 2026-09-13, Fab in the installed Epic Games Launcher added the free asset to
+its library and exposed Download only. The download then failed with
+`FAB-FAB001` / `Unknown Error`. No usable package was obtained or imported.
+Do not repeat library setup, download retries or importer work without new
+evidence that this route is available. The helper below is retained for a future
+successfully downloaded package; it has not passed end-to-end validation.
 
 Download its `.mhpkg` from Fab, then run:
 
