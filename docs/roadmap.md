@@ -7,6 +7,11 @@ These are scope milestones, not delivery dates. See the [beta plan and contingen
 This ordering supersedes the older numbered milestones below for new embodiment
 work. Maintain the existing 2D beta, but prioritize proving a real rigged body.
 
+The desktop prototype now works. The next focused work is the
+[approved appearance](appearance.md) and usable conversation/desktop controls.
+Reuse the working rig and authored motion; avoid additional isolated animation
+polish or repeated broad tests without a relevant change.
+
 1. **Foundation / Skeleton Zero:** Unreal + a temporary rigged skeletal character,
    idle, gaze, listen, speech cue, gesture and movement in one real-time scene.
    The [offline controller and native Unreal stage](skeleton-zero.md) demonstrate

@@ -1,4 +1,5 @@
 #include "AuraMetaHuman.h"
+#include "AuraAppearance.h"
 #include "AuraBehaviorComponent.h"
 #include "AuraRigActor.h"
 #include "AuraPaths.h"
@@ -205,6 +206,7 @@ void UAuraMetaHuman::BeginPlay()
         Anim->bFace = Mesh == Face;
         Mesh->AddTickPrerequisiteComponent(Anim->PoseSource);
     }
+    ApplyAuraAppearance(Character);
     Driver->Body->SetVisibility(false, false);
     AddTickPrerequisiteComponent(Face);
     bReady = true;
