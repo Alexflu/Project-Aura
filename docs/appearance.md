@@ -22,6 +22,10 @@ coiled preset does not reproduce the illustration's distinct violet hair tips.
 
 ## Next asset work, in order
 
+The [fitted wardrobe contract](wardrobe.md) describes importing full outfit parts
+and enabling them on the existing animated body. A tactical garment is not yet
+installed; this loader preserves the preset when a supplied asset is incompatible.
+
 ### Installed layered hair
 
 After assembling the face, run `python tools/unreal_body.py prepare-hair` once,
