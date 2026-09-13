@@ -22,6 +22,21 @@ coiled preset does not reproduce the illustration's distinct violet hair tips.
 
 ## Next asset work, in order
 
+### Installed layered hair
+
+After assembling the face, run `python tools/unreal_body.py prepare-hair` once,
+then build and restart the desktop host. This copies Epic's installed medium
+layered groom and creates a binding from its reference head to Aura's face under
+`/Game/Aura/Appearance`. The runtime uses this pair when compatible; missing assets
+keep the assembled hair. `-AuraOriginalHair` explicitly selects the preset hair.
+The local provenance report is `Saved/Aura/layered-hair-manifest.json`.
+
+The groom retains references to installed MetaHuman Creator content. Packaging
+must migrate those dependencies before distributing a standalone build. The
+generated files stay local and are not relicensed or committed as MIT assets.
+This improves the silhouette; it does not finish the illustrated spiky cut or
+establish final hair physics. Rebind and inspect after changing the face mesh.
+
 1. Replace the short coiled preset hair with the approved layered silhouette and
    violet ends. Keep compatible groom bindings or a properly skinned hair mesh.
 2. Build the fitted black tactical outfit, grey outerwear, straps and boots around

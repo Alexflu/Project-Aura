@@ -79,7 +79,7 @@ def launch_command(engine, metahuman=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman", "open-metahuman", "audit-metahuman"))
+    parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman", "open-metahuman", "audit-metahuman", "prepare-hair"))
     parser.add_argument("--engine-root", type=Path)
     parser.add_argument("--metahuman", action="store_true", help="Use the locally assembled MetaHuman for run/demo")
     args = parser.parse_args()
@@ -96,8 +96,8 @@ def main():
                    f"-ExecutePythonScript={ROOT / 'tools/unreal_open_metahuman.py'}"]
         process = subprocess.Popen(command, env=runtime_environment())
         print(f"Opening MetaHuman Creator (process {process.pid}). First startup may take several minutes.")
-    elif args.action in ("prepare-metahuman", "audit-metahuman"):
-        script = "unreal_prepare_metahuman.py" if args.action == "prepare-metahuman" else "unreal_audit_metahuman.py"
+    elif args.action in ("prepare-metahuman", "audit-metahuman", "prepare-hair"):
+        script = {"prepare-metahuman": "unreal_prepare_metahuman.py", "audit-metahuman": "unreal_audit_metahuman.py", "prepare-hair": "unreal_prepare_hair.py"}[args.action]
         command = [str(engine / "Engine/Binaries/Win64/UnrealEditor-Cmd.exe"), str(PROJECT),
                    "-run=pythonscript", f"-script={ROOT / 'tools' / script}", "-Unattended", "-NullRHI"]
         subprocess.run(command, env=runtime_environment(), check=True)
