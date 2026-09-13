@@ -1,6 +1,7 @@
 #include "AuraStageMode.h"
 #include "AuraRigActor.h"
 #include "AuraMetaHuman.h"
+#include "AuraDesktop.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "AuraBehaviorComponent.h"
@@ -32,6 +33,7 @@ void AAuraStageMode::BeginPlay()
     Super::BeginPlay();
     UWorld* World = GetWorld();
     AAuraRigActor* Driver = World->SpawnActor<AAuraRigActor>(FVector::ZeroVector, FRotator::ZeroRotator);
+    const bool Desktop = FParse::Param(FCommandLine::Get(), TEXT("AuraDesktop"));
     if (FParse::Param(FCommandLine::Get(), TEXT("AuraMetaHuman")))
     {
         UAuraMetaHuman* Adapter = NewObject<UAuraMetaHuman>(Driver);
@@ -42,6 +44,7 @@ void AAuraStageMode::BeginPlay()
     Floor->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
     Floor->GetStaticMeshComponent()->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")));
     Floor->SetActorScale3D(FVector(12, 12, .1f));
+    Floor->SetActorHiddenInGame(Desktop);
     ADirectionalLight* Light = World->SpawnActor<ADirectionalLight>(FVector(100, -100, 400), FRotator(-45, -30, 0));
     Light->GetLightComponent()->SetIntensity(4);
     ASkyLight* Fill = World->SpawnActor<ASkyLight>();
@@ -58,6 +61,12 @@ void AAuraStageMode::BeginPlay()
     Camera->GetCameraComponent()->SetFieldOfView(40);
     if (APlayerController* Player = UGameplayStatics::GetPlayerController(World, 0))
         Player->SetViewTarget(Camera);
+    if (Desktop)
+    {
+        UAuraDesktop* Presenter = NewObject<UAuraDesktop>(Driver);
+        Driver->AddInstanceComponent(Presenter);
+        Presenter->RegisterComponent();
+    }
 }
 
 void AAuraStageHUD::DrawHUD()

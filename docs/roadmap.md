@@ -10,7 +10,8 @@ work. Maintain the existing 2D beta, but prioritize proving a real rigged body.
 1. **Foundation / Skeleton Zero:** Unreal + a temporary rigged skeletal character,
    idle, gaze, listen, speech cue, gesture and movement in one real-time scene.
    The [offline controller and native Unreal stage](skeleton-zero.md) demonstrate
-   a compiled skeletal mannequin. Facial performance and MetaHuman replacement remain in
+   a compiled skeletal body, assembled MetaHuman, authored idle/walk clips and local
+   speech-driven jaw motion. Further facial and movement quality remains in
    [issue #13](https://github.com/Alexflu/Project-Aura/issues/13).
 2. **Realtime conversation:** opt-in OpenAI Realtime, audible streaming playback,
    interruption, playback-clock mouth animation and session lifecycle.
@@ -20,6 +21,11 @@ work. Maintain the existing 2D beta, but prioritize proving a real rigged body.
    freshness/confidence and visible capture state. No ambient capture by default.
 5. **Desktop embodiment:** transparent host window, monitor coordinates, occlusion,
    hit-testing and approved app adapters through AuraCore.
+   The local Windows prototype now provides a transparent draggable 3D overlay,
+   local speech controls and pause/close. Monitor-coordinate integration, app
+   interaction, packaging and production composition remain open. Prioritize this
+   usable desktop loop alongside conversation; do not require finished animation
+   polish before continuing host integration.
 6. **Polish/performance:** asset provenance, profiling, reduced motion/accessibility,
    packaging and clean-machine tests. High-fidelity assets follow the working loop.
 

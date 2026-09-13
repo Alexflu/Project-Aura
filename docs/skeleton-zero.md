@@ -6,6 +6,48 @@ is a temporary rigged 3D body; it is not Aura's final MetaHuman. There is no aud
 playback or live AI in this harness.
 Tracking: [issue #13](https://github.com/Alexflu/Project-Aura/issues/13).
 
+## 3D desktop presence
+
+After the setup and MetaHuman assembly below, double-click **Launch Aura Desktop.cmd**
+or run `python tools/unreal_desktop.py`. The control panel opens while Unreal loads;
+once the first valid transparent frame is ready, its stage window is hidden and
+the character appears over the desktop. Drag the visible body to reposition the
+overlay. Empty transparent pixels pass input to underlying windows. The panel has
+local Speak, Stop, Pause/Resume and Close controls; right-clicking the character
+also closes the session. Pausing stops speech and freezes body animation.
+
+This is the first desktop host, not a packaged release or a live AI conversation.
+It uses the existing locally assembled Ada prototype. No microphone, screenshot
+capture of other apps, automatic startup or app-control permissions are enabled.
+Only the Unreal scene is rendered into the overlay. Closing controls terminates
+only the renderer launched by that session; renderer exit closes the controls.
+A stalled desktop-render heartbeat stops speech and terminates that renderer.
+
+Implementation: `UAuraDesktop` captures a 480x720 scene with inverse-opacity alpha,
+converts it to premultiplied BGRA and presents a native Windows layered window.
+This preserves transparency independently of character color. The overlay is
+always on top and does not take focus when shown. Its position is currently a
+window placement, not a mapping from semantic walking coordinates to desktop pixels.
+The prototype uses a synchronous GPU readback, simple HDR display conversion and
+a 30 fps engine cap. Color, edge quality, efficiency, monitor/DPI handling and
+packaging still need production work. Performance of the normal Unreal stage
+does not establish performance of this extra capture/compositing path.
+
+The repeating `desktop-status.json` is a small overwritten heartbeat in the
+session directory, so desktop sessions can continue beyond the optional two-minute
+development telemetry limit. `desktop-ready.json` records the initial opaque/clear
+pixel counts. Neither file contains screen content or the text spoken.
+
+Validation: Unreal 5.6.1 build and 110 Python tests passed. A live desktop check
+verified transparent/background hit testing, an opaque draggable body, topmost
+style, hidden stage window, speech playback, pause/zero mouth, resume and right-click
+shutdown. Reproduce with `python tools/unreal_desktop_smoke.py` using a Windows
+environment with `pywin32` installed. This test moves the cursor and the Aura window
+and plays a short local sentence. One local monitor/DPI arrangement was checked;
+broad multi-monitor/DPI behavior and acoustic lip-sync accuracy remain unverified.
+
+Reference: [Windows layered-window composition](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-updatelayeredwindow).
+
 ## Automated mannequin route
 
 Install Unreal 5.6.1 with **Templates and Feature Packs**, Engine Source and
@@ -47,7 +89,8 @@ semantic commands alone move the actor. Listening changes
 the attentive pose and HUD. The synthetic speech signal is a HUD meter because
 this mannequin has no facial rig. Expression/blush are also diagnostic signals;
 MetaHuman face/material bindings remain open. Pause/disconnect hold position and
-freeze skeletal motion. There is no transparent desktop window yet.
+freeze skeletal motion. This standalone stage remains a normal window; the
+desktop route above supplies the transparent overlay.
 
 Nods now use a gesture-local phase and a blended weight instead of entering the
 global idle cycle mid-motion. Expiry fades the nod; retriggering during its fade
