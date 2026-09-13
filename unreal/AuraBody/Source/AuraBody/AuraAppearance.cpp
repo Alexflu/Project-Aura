@@ -1,5 +1,12 @@
 #include "AuraAppearance.h"
 #include "Components/MeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GroomComponent.h"
+#include "GroomAsset.h"
+#include "GroomBindingAsset.h"
+#if WITH_EDITOR
+#include "GroomBindingCompiler.h"
+#endif
 #include "GameFramework/Actor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Misc/CommandLine.h"
@@ -7,7 +14,35 @@
 
 void ApplyAuraAppearance(AActor* Character)
 {
-    if (!Character || FParse::Param(FCommandLine::Get(), TEXT("AuraOriginalMaterials"))) return;
+    if (!Character) return;
+    if (!FParse::Param(FCommandLine::Get(), TEXT("AuraOriginalHair")))
+    {
+        UGroomComponent* Hair = nullptr;
+        USkeletalMeshComponent* Face = nullptr;
+        TArray<UActorComponent*> Components;
+        Character->GetComponents(Components);
+        for (UActorComponent* Component : Components)
+        {
+            if (Component->GetFName() == TEXT("Hair")) Hair = Cast<UGroomComponent>(Component);
+            if (Component->GetFName() == TEXT("Face")) Face = Cast<USkeletalMeshComponent>(Component);
+        }
+        // Local prepared assets are optional. Keep the assembled groom on failure.
+        UGroomAsset* Groom = LoadObject<UGroomAsset>(nullptr, TEXT("/Game/Aura/Appearance/Hair_M_Layered.Hair_M_Layered"), nullptr, LOAD_NoWarn);
+        UGroomBindingAsset* Binding = LoadObject<UGroomBindingAsset>(nullptr, TEXT("/Game/Aura/Appearance/Hair_M_Layered_Binding.Hair_M_Layered_Binding"), nullptr, LOAD_NoWarn);
+#if WITH_EDITOR
+        // Editor game startup may still be building the newly loaded binding.
+        if (Binding) FGroomBindingCompilingManager::Get().FinishCompilation({Binding});
+#endif
+        if (Hair && Face && Groom && Binding &&
+            UGroomBindingAsset::IsCompatible(Face->GetSkeletalMeshAsset(), Binding, true) &&
+            UGroomBindingAsset::IsCompatible(Groom, Binding, true))
+        {
+            Hair->SetGroomAsset(Groom, Binding);
+            UE_LOG(LogTemp, Display, TEXT("Aura appearance: layered hair bound to face"));
+        }
+        else UE_LOG(LogTemp, Display, TEXT("Aura appearance: keeping assembled hair; prepare local layered assets to enable replacement"));
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("AuraOriginalMaterials"))) return;
     TArray<UMeshComponent*> Meshes;
     Character->GetComponents(Meshes);
     int32 Changed = 0;
