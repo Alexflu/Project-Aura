@@ -4,7 +4,7 @@ The current local installation contains only MetaHuman's basic shirt and shorts.
 No tactical jacket, trousers or boots have been added yet. The runtime now accepts
 up to eight fitted skeletal garment parts without changing the animation adapter.
 
-## Optional fitting reference: Epic Techwear (parked)
+## Optional fitting reference: Epic Techwear
 
 [Epic's MetaHuman Techwear Outfit](https://www.fab.com/listings/9e04c752-1979-4723-b78f-6d24afc532bc)
 is a free parametric jacket, pants and shoes set with customizable materials. It
@@ -15,9 +15,12 @@ separate customizable pieces matching the approved illustration.
 On 2026-09-13, Fab in the installed Epic Games Launcher added the free asset to
 its library and exposed Download only. The download then failed with
 `FAB-FAB001` / `Unknown Error`. No usable package was obtained or imported.
-Do not repeat library setup, download retries or importer work without new
-evidence that this route is available. The helper below is retained for a future
-successfully downloaded package; it has not passed end-to-end validation.
+Later that day, after updating and restarting Windows, the user downloaded
+`oa_techwearoutfit.mhpkg` and `techwearbodypresets.zip` successfully using Chrome.
+This removes the package-download blocker; it does not establish Windows Update
+as the cause of the earlier failures. Do not repeat download troubleshooting.
+The body-presets archive contains example G/H bodies, not required outfit parts;
+do not apply those presets to Aura merely to use the outfit.
 
 Download its `.mhpkg` from Fab, then run:
 
@@ -38,8 +41,12 @@ assembled materials, shoulders/hips/knees and body masking before enabling the
 new look. This parametric route does not require entries in `[Aura.Wardrobe]`.
 
 Keep the package, imported assets and assembly local under their Epic/Fab terms;
-they are not MIT source assets. The importer has only been syntax/CLI checked
-until the account download is available; actual import and fit remain pending.
+they are not MIT source assets. On 2026-09-13, the full-editor import completed
+with no messages in Unreal's Import Summary. It discovered
+`WI_OA_techwearOutfit` at the required destination and wrote the local provenance
+report. The downloaded package SHA-256 is
+`3a552f031ef9430ed5fae643bde5a18b5545b71ed6f36dbccf19bb1bd08c4028`.
+Fitting, assembly and runtime visual checks remain separate acceptance steps.
 See also Epic's [outfit workflow](https://dev.epicgames.com/documentation/metahuman/building-an-outfit-asset-in-unreal-engine).
 
 ## Asset contract
