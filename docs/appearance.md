@@ -23,8 +23,9 @@ coiled preset does not reproduce the illustration's distinct violet hair tips.
 ## Next asset work, in order
 
 The [fitted wardrobe contract](wardrobe.md) describes importing full outfit parts
-and enabling them on the existing animated body. A tactical garment is not yet
-installed; this loader preserves the preset when a supplied asset is incompatible.
+and enabling them on the existing animated body. Epic Techwear is now locally
+fitted and assembled as a temporary reference. The separate garment loader
+preserves the assembled outfit when a supplied replacement is incompatible.
 
 ### Installed layered hair
 
