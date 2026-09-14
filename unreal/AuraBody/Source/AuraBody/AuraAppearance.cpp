@@ -37,6 +37,9 @@ void ApplyAuraAppearance(AActor* Character)
             UGroomBindingAsset::IsCompatible(Face->GetSkeletalMeshAsset(), Binding, true) &&
             UGroomBindingAsset::IsCompatible(Groom, Binding, true))
         {
+            // Overrides belong to the assembled hairstyle (including its card
+            // atlases). Let the replacement groom supply its own materials.
+            Hair->EmptyOverrideMaterials();
             Hair->SetGroomAsset(Groom, Binding);
             UE_LOG(LogTemp, Display, TEXT("Aura appearance: layered hair bound to face"));
         }
