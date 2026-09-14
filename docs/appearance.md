@@ -36,6 +36,14 @@ layered groom and creates a binding from its reference head to Aura's face under
 keep the assembled hair. `-AuraOriginalHair` explicitly selects the preset hair.
 The local provenance report is `Saved/Aura/layered-hair-manifest.json`.
 
+When replacing the assembled groom, the runtime clears its old material overrides
+before applying the new groom and Aura palette. The locally assembled coiled hair
+uses cards/strands/helmet slots, while the layered groom uses strands/cards/helmet.
+Keeping overrides by index therefore applies the wrong material to the first two
+slots. Each replacement must start from its own groom materials, not the previous
+hairstyle's textures or slot order. The original-hair option retains the assembled
+materials because it bypasses replacement.
+
 The groom retains references to installed MetaHuman Creator content. Packaging
 must migrate those dependencies before distributing a standalone build. The
 generated files stay local and are not relicensed or committed as MIT assets.
