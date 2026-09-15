@@ -81,6 +81,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "build", "run", "demo", "prepare-metahuman", "open-metahuman", "audit-metahuman", "prepare-hair"))
     parser.add_argument("--engine-root", type=Path)
+    parser.add_argument("--hair-style", choices=("Hair_M_Layered", "Hair_M_BobMessy"), default="Hair_M_Layered",
+                        help="Installed groom to bind with prepare-hair; preserves other prepared styles")
     parser.add_argument("--metahuman", action="store_true", help="Use the locally assembled MetaHuman for run/demo")
     args = parser.parse_args()
     engine = (args.engine_root or installed_engine()).resolve()
@@ -100,7 +102,10 @@ def main():
         script = {"prepare-metahuman": "unreal_prepare_metahuman.py", "audit-metahuman": "unreal_audit_metahuman.py", "prepare-hair": "unreal_prepare_hair.py"}[args.action]
         command = [str(engine / "Engine/Binaries/Win64/UnrealEditor-Cmd.exe"), str(PROJECT),
                    "-run=pythonscript", f"-script={ROOT / 'tools' / script}", "-Unattended", "-NullRHI"]
-        subprocess.run(command, env=runtime_environment(), check=True)
+        environment = runtime_environment()
+        if args.action == "prepare-hair":
+            environment["AURA_HAIR_STYLE"] = args.hair_style
+        subprocess.run(command, env=environment, check=True)
     elif args.action == "demo":
         folder = PROJECT.parent / "Saved/Aura/Demos" / uuid.uuid4().hex[:10]
         folder.mkdir(parents=True)

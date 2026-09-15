@@ -10,6 +10,7 @@
 #include "GameFramework/Actor.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Misc/CommandLine.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/Parse.h"
 
 void ApplyAuraAppearance(AActor* Character)
@@ -27,8 +28,12 @@ void ApplyAuraAppearance(AActor* Character)
             if (Component->GetFName() == TEXT("Face")) Face = Cast<USkeletalMeshComponent>(Component);
         }
         // Local prepared assets are optional. Keep the assembled groom on failure.
-        UGroomAsset* Groom = LoadObject<UGroomAsset>(nullptr, TEXT("/Game/Aura/Appearance/Hair_M_Layered.Hair_M_Layered"), nullptr, LOAD_NoWarn);
-        UGroomBindingAsset* Binding = LoadObject<UGroomBindingAsset>(nullptr, TEXT("/Game/Aura/Appearance/Hair_M_Layered_Binding.Hair_M_Layered_Binding"), nullptr, LOAD_NoWarn);
+        FString GroomPath = TEXT("/Game/Aura/Appearance/Hair_M_Layered.Hair_M_Layered");
+        FString BindingPath = TEXT("/Game/Aura/Appearance/Hair_M_Layered_Binding.Hair_M_Layered_Binding");
+        GConfig->GetString(TEXT("Aura.Appearance"), TEXT("Groom"), GroomPath, GGameIni);
+        GConfig->GetString(TEXT("Aura.Appearance"), TEXT("GroomBinding"), BindingPath, GGameIni);
+        UGroomAsset* Groom = LoadObject<UGroomAsset>(nullptr, *GroomPath, nullptr, LOAD_NoWarn);
+        UGroomBindingAsset* Binding = LoadObject<UGroomBindingAsset>(nullptr, *BindingPath, nullptr, LOAD_NoWarn);
 #if WITH_EDITOR
         // Editor game startup may still be building the newly loaded binding.
         if (Binding) FGroomBindingCompilingManager::Get().FinishCompilation({Binding});
@@ -41,7 +46,7 @@ void ApplyAuraAppearance(AActor* Character)
             // atlases). Let the replacement groom supply its own materials.
             Hair->EmptyOverrideMaterials();
             Hair->SetGroomAsset(Groom, Binding);
-            UE_LOG(LogTemp, Display, TEXT("Aura appearance: layered hair bound to face"));
+            UE_LOG(LogTemp, Display, TEXT("Aura appearance: %s bound to face"), *Groom->GetName());
         }
         else UE_LOG(LogTemp, Display, TEXT("Aura appearance: keeping assembled hair; prepare local layered assets to enable replacement"));
     }

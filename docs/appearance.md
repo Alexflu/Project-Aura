@@ -27,10 +27,33 @@ and enabling them on the existing animated body. Epic Techwear is now locally
 fitted and assembled as a temporary reference. The separate garment loader
 preserves the assembled outfit when a supplied replacement is incompatible.
 
-### Installed layered hair
+### Working hairstyle: fitted messy bob
+
+The current configured groom is Epic's `Hair_M_BobMessy`, fitted to Aura's existing
+face. A local desktop check on 2026-09-15 showed a fuller outline and side-swept
+fringe compared with the previous layered groom. It remains an intermediate
+hairstyle: the illustrated spikes, violet tip definition and final shading are
+not complete. No face geometry or rig was changed.
+
+Prepare this optional local asset once:
+
+```powershell
+python tools/unreal_body.py prepare-hair --hair-style Hair_M_BobMessy
+```
+
+The provenance report is `Saved/Aura/messy-bob-hair-manifest.json`. Prepared styles
+have separate asset and binding paths, so preparing the bob preserves the layered
+groom. `[Aura.Appearance]` in `Config/DefaultGame.ini` selects `Groom` and
+`GroomBinding`; always change both together. Restart the host to apply a selection.
+Missing or incompatible pairs retain the assembled preset. To return to the
+previous layered style, set both paths to `Hair_M_Layered` and
+`Hair_M_Layered_Binding` under `/Game/Aura/Appearance`, or remove both settings.
+`-AuraOriginalHair` bypasses this selection entirely.
+
+### Preserved layered hair
 
 After assembling the face, run `python tools/unreal_body.py prepare-hair` once,
-then build and restart the desktop host. This copies Epic's installed medium
+then restart the desktop host after selecting that pair. This copies Epic's installed medium
 layered groom and creates a binding from its reference head to Aura's face under
 `/Game/Aura/Appearance`. The runtime uses this pair when compatible; missing assets
 keep the assembled hair. `-AuraOriginalHair` explicitly selects the preset hair.
