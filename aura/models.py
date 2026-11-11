@@ -201,8 +201,11 @@ class Model:
                 side=max(32,math.ceil(384*scale));center=side/2
                 tile=Image.new('RGBA',(side,side))
                 paint(ImageDraw.Draw(tile),[item],center-ox*scale,center-oy*scale,scale,clock,0,cast if not still else -1)
-                if item['slot']!='spell':tile=tile.rotate(-point[2],resample=Image.Resampling.BICUBIC)
-                result.alpha_composite(tile,(round(point[0]-center),round(point[1]-center)))
+                from .rendering import rotate_visible
+                rotated=rotate_visible(tile,-point[2] if item['slot']!='spell' else 0)
+                if rotated:
+                    tile,(left,top)=rotated
+                    result.alpha_composite(tile,(round(point[0]-center)+left,round(point[1]-center)+top))
         if music:
             from .music import props, unpack
             from .rig_motion import envelope
