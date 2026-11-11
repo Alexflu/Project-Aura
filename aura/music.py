@@ -53,14 +53,33 @@ def angles(mode,energy,clock):
         return dict(head=12,chest=2,left_upper_arm=30,left_forearm=-150,
                     right_upper_arm=-30,right_forearm=150)
     if mode=='gentle':return dict(head=pulse*5*energy,chest=sway*1.5*energy)
-    if mode=='headbang':return dict(head=pulse*17*energy,chest=pulse*6*energy)
+    if mode=='headbang':return dict(head=pulse*17*energy,chest=math.sin(clock*math.tau*1.5-.35)*6*energy)
     if mode=='dance':
         return dict(head=-sway*5*energy,chest=sway*7*energy,
                     left_upper_arm=(15+pulse*10)*energy,right_upper_arm=(-15+pulse*10)*energy,
-                    left_forearm=-25*energy,right_forearm=25*energy,
+                    left_forearm=(-25+sway*5)*energy,right_forearm=(25+sway*5)*energy,
+                    left_hand=math.sin(clock*math.tau*.75-.6)*8*energy,
+                    right_hand=-math.sin(clock*math.tau*.75-.6)*8*energy,
                     left_thigh=sway*3*energy,right_thigh=sway*3*energy,
-                    left_shin=-sway*2*energy,right_shin=-sway*2*energy)
+                    left_shin=-sway*2*energy,right_shin=-sway*2*energy,
+                    left_foot=-sway*energy,right_foot=-sway*energy)
     return {}
+
+
+def secondary(names,mode,energy,clock):
+    """Art-directed follow-through on optional roles, not collision physics."""
+    if mode not in ('dance','headbang','gentle'):return {}
+    energy=max(0,min(1,energy))
+    frequency=1.5 if mode=='headbang' else .75
+    amplitude={'gentle':1,'dance':3,'headbang':6}[mode]*energy
+    result={}
+    for name in names:
+        role=name.split('_',1)[0]
+        if role in ('hair','cloth','gear'):
+            lag={'hair':.65,'cloth':.9,'gear':1.1}[role]
+            gain={'hair':1,'cloth':.55,'gear':.35}[role]
+            result[name]=-math.sin(clock*math.tau*frequency-lag)*amplitude*gain
+    return result
 
 
 def props(image,model,pose,mode,energy,clock):

@@ -10,7 +10,7 @@ import tempfile
 from PIL import Image
 from .core import AuraError
 
-MOTIONS=('idle','wave','inspect','draw','bow','cast')
+MOTIONS=('idle','wave','inspect','draw','bow','cast','stretch')
 MAX_PIXELS=16_000_000
 
 
@@ -93,6 +93,7 @@ class Model:
     @property
     def capabilities(self):
         caps=['idle','inspect','bow']
+        if {'left_upper_arm','right_upper_arm','left_forearm','right_forearm'}<=self.names:caps.append('stretch')
         if {'left_upper_arm','left_forearm','left_hand'}<=self.names:caps.append('cast')
         if {'right_upper_arm','right_forearm','right_hand'}<=self.names:caps.append('wave')
         if 'wave' in caps and {'hand_right','holster_right'}<=self.data['sockets'].keys():
@@ -107,12 +108,14 @@ class Model:
         angles=shared_angles(self.names,t,motion,t if clock is None else clock)
         angles['head']+=max(-1,min(1,gaze))*6
         if music:
-            from .music import angles as music_angles, unpack
+            from .music import angles as music_angles, secondary, unpack
             from .rig_motion import envelope
             mode,energy,weight=unpack(music)
             weight*=1-envelope(t) if motion!='idle' else 1
             for name,value in music_angles(mode,energy,t if clock is None else clock).items():
                 if name in self.names:angles[name]=angles.get(name,0)+value*weight
+            for name,value in secondary(self.names,mode,energy,t if clock is None else clock).items():
+                angles[name]=angles.get(name,0)+value*weight
         def evaluate():
             world={}
             for bone in self.data['bones']:

@@ -12,7 +12,13 @@ def envelope(t):
 def angles(names, t, motion, clock):
     blend = envelope(t) if motion != 'idle' else 0
     result = {'chest': math.sin(clock * 1.7) * 1.1, 'head': math.sin(clock * .8) * 2}
-    if motion == 'wave':
+    if motion == 'stretch':
+        result['chest']-=3*blend
+        result['head']-=8*blend
+        result.update(left_upper_arm=100*blend,right_upper_arm=-100*blend,
+                      left_forearm=55*blend,right_forearm=-55*blend,
+                      left_hand=-12*blend,right_hand=12*blend)
+    elif motion == 'wave':
         result.update(right_upper_arm=-65 * blend,
                       right_forearm=(-95 + math.sin(t * 9) * 12) * blend,
                       right_hand=math.sin(t * 9) * 13 * blend)
@@ -43,4 +49,6 @@ def angles(names, t, motion, clock):
         result[name] = amplitude * (math.sin(clock * 1.8 + phase) +
                                    .3 * math.sin(clock * 3.1 + phase))
         result[name] += blend * amplitude * math.sin(t * 4.5 + phase)
+    for name,sign in (('left_upper_arm',1),('right_upper_arm',-1)):
+        result[name]=result.get(name,0)+sign*math.sin(clock*1.7)*.7*(1-blend)
     return {name: value for name, value in result.items() if name in names}

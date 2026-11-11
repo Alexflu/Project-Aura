@@ -37,7 +37,7 @@ class SharedMotionTests(unittest.TestCase):
                 self.assertLess(box[3],height,(motion,t))
 
     def test_gestures_blend_back_to_continuous_idle(self):
-        for motion in ('wave','bow','cast','inspect'):
+        for motion in ('wave','bow','cast','inspect','stretch'):
             for t in (0,3.2):
                 actual=self.model.pose(t,motion,clock=17)
                 expected=self.model.pose(17,'idle',clock=17)
@@ -50,7 +50,7 @@ class SharedMotionTests(unittest.TestCase):
         for bone in data['bones']:bone['position']=[v*.6 for v in bone['position']]
         for socket in data['sockets'].values():socket['position']=[v*.6 for v in socket['position']]
         smaller=Model(data,self.model.images)
-        for motion in ('bow','cast','wave','draw'):
+        for motion in ('bow','cast','wave','draw','stretch'):
             first=self.model.pose(1.2,motion);second=smaller.pose(1.2,motion)
             for name in first:
                 for i in (0,1):self.assertAlmostEqual(first[name][i]*.6,second[name][i],places=5)

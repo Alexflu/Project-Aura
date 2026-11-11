@@ -1,11 +1,19 @@
 import copy
 from pathlib import Path
 import unittest
-from aura.music import Reaction,Transition,angles
+from aura.music import Reaction,Transition,angles,secondary
 from aura.models import Model,load_pack
 
 
 class MusicTests(unittest.TestCase):
+    def test_secondary_roles_follow_music_without_driving_unrelated_joints(self):
+        names={'hair_back','cloth_coat','gear_bag','head','custom_joint'}
+        self.assertEqual(set(secondary(names,'dance',1,0)),{'hair_back','cloth_coat','gear_bag'})
+        self.assertEqual(secondary(names,'read',1,0),{})
+        for t in (0,.1,1,10000):
+            self.assertTrue(all(v==0 for v in secondary(names,'dance',0,t).values()))
+            self.assertTrue(all(abs(v)<=6 for v in secondary(names,'headbang',1,t).values()))
+        self.assertNotEqual(secondary(names,'headbang',1,0)['hair_back'],0)
     def test_style_changes_pass_through_neutral_and_stop_resets(self):
         transition=Transition()
         for _ in range(40):result=transition.update('read',.025,.8)

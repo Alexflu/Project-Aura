@@ -10,7 +10,7 @@ Desktop companion. Digital familiar. Occasionally arrives by helicopter.
 
 [Beta downloads and demo](https://github.com/Alexflu/Project-Aura/releases) · [Creator rig standard](docs/model-standard.md) · [Contributing](CONTRIBUTING.md)
 
-## Windows beta 0.7.0-beta.9
+## Windows beta 0.7.0-beta.10
 
 **New development direction: real-time 3D embodiment.** The first
 [Skeleton Zero harness](docs/skeleton-zero.md) adds an offline semantic controller

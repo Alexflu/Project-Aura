@@ -532,7 +532,7 @@ class App:
         self.button(p,"Open reference rig",self.use_reference_model).pack(anchor="w",pady=5)
         self.button(p,"Restore default Aura",self.clear_model).pack(anchor="w",pady=5)
         row=tk.Frame(p,bg=PANEL);row.pack(fill="x",pady=12)
-        for motion in ("wave","inspect","draw","bow"):
+        for motion in ("wave","inspect","draw","bow","stretch"):
             self.button(row,motion.title(),lambda m=motion:self.play_model_motion(m)).pack(side="left",padx=(0,8))
         self.paragraph(p,"The reference rig is a technical mannequin, not a replacement for Aura's approved artwork. Draw requires a holster item. Imported packs and your selection are saved locally. Restart restores your model; missing or damaged packs fall back to default Aura.")
         self.paragraph(p,"Compatibility depends on declared joints and sockets. Missing optional joints disable those motions; extra joints and custom art remain allowed. See docs/model-standard.md and the reference pack for authoring.")
